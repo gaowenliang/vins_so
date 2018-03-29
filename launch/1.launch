@@ -1,0 +1,40 @@
+<launch>
+
+    <arg name="cam_num" default = "1" />
+
+    <arg name="cam_config_path_up"      default = "$(find feature_tracker)/../config/A3/vins/cam_config_up.yaml" />
+    <arg name="cam_config_path_down"    default = "$(find feature_tracker)/../config/A3/vins/cam_config_down.yaml" />
+    <arg name="feature_config_path"     default = "$(find feature_tracker)/../config/A3/vins/feature_config.yaml" />
+    <arg name="vins_config_path"        default = "$(find feature_tracker)/../config/A3/vins/vins_config.yaml" />
+    <arg name="vins_path"               default = "$(find feature_tracker)/../config/../" />
+
+    <node ns="tracker" name="tracker" pkg="feature_tracker" type="feature_tracker" output="screen">
+        <param name="vins_folder" type="string" value="$(arg vins_path)" />
+        <param name="num_of_cam" type="int" value="$(arg cam_num)" />
+        <rosparam subst_value="True">
+            # individual setting for camera 0
+            feature_config_file:        $(arg feature_config_path)
+            vins_config_file:           $(arg vins_config_path)
+            camera0:
+                cam_config_file:        $(arg cam_config_path_up)
+            camera1:
+                cam_config_file:        $(arg cam_config_path_down)
+        </rosparam>
+    </node>
+
+
+    <node ns = "vins" name="vins" pkg="vins_estimator" type="vins_estimator" output="screen">
+        <param name="vins_folder" type="string" value="$(arg vins_path)" />
+        <param name="num_of_cam" type="int" value="$(arg cam_num)" />
+<!--        <param name="num_of_cam" type="int" value="1" />-->
+        <rosparam subst_value="True">
+            # individual setting for camera 0
+            vins_config_file:           $(arg vins_config_path)
+            camera0:
+                cam_config_file:        $(arg cam_config_path_up)
+            camera1:
+                cam_config_file:        $(arg cam_config_path_down)
+        </rosparam>
+    </node>
+
+</launch>

@@ -1,0 +1,117 @@
+<launch>
+
+    <node pkg="feature_frontend" type="stereoPreprocess" name="process" >
+        <param name="is_image_show" type="bool" value="false"/>
+        <param name="down_sample_scale" type="double" value="1.0"/>
+        <remap from="/stereo/left/image_raw" to="/pg_17221110/image_raw"/>
+        <remap from="/stereo/right/image_raw" to="/pg_17221121/image_raw"/>
+        <remap from="/stereo/left/image" to="/pg_17221110/image"/>
+        <remap from="/stereo/right/image" to="/pg_17221121/image"/>
+    </node>
+
+    <node pkg="fisheye_model" type="dualfisheye_node" name="fisheyeUp" >
+        <remap from="~up_image_raw" to="/pg_17221110/image_raw"/>
+        <remap from="~down_image_raw" to="/pg_17221121/image_raw"/>
+
+        <param name="up_camera_model_file" type="string" value="$(find vins_so)/../config/dual/cam_up_camera_calib.yaml"/>
+        <param name="up_vignetting_model_file" type="string" value="$(find vins_so)/../config/dual/up_vignetting_model_calib.yaml"/>
+
+        <param name="down_camera_model_file" type="string" value="$(find vins_so)/../config/dual/cam_down_camera_calib.yaml"/>
+        <param name="down_vignetting_model_file" type="string" value="$(find vins_so)/../config/dual/down_vignetting_model_calib.yaml"/>
+
+        <param name="up_cropper_file" type="string" value="$(find fisheye_model)/config/fisheyeUp.yaml"/>
+        <param name="down_cropper_file" type="string" value="$(find fisheye_model)/config/fisheyeUp.yaml"/>
+
+        <param name="is_image_show" type="bool" value="false"/>
+        <param name="camera_num" type="int" value="4"/>
+        <rosparam>
+            imgFInfo:           /camera_info
+            # individual setting for camera 0
+            camera0: #L
+                pub_image:      /image/L
+                max_image_size: 315
+                angle_row:      65.0
+                angle_col:      90.0
+                rate:           15
+            camera1: #F
+                pub_image:      /image/F
+                max_image_size: 409
+                angle_row:      65.0
+                angle_col:      90.0
+                rate:           12
+            camera2: #R
+                pub_image:      /image/R
+                max_image_size: 315
+                angle_row:      65.0
+                angle_col:      90.0
+                rate:           12
+            camera3: #B
+                pub_image:      /image/B
+                max_image_size: 315
+                angle_row:      65.0
+                angle_col:      90.0
+                rate:           12
+        </rosparam>
+    </node>
+
+
+<node pkg="feature_frontend" type="dualfisheyefeaturenode" name="feature" output="screen">
+  <param name="camera_num_stereo" type="int" value="4"/>
+  <param name="camera_num_mono" type="int" value="2"/>
+  <rosparam>
+      camera0:
+          image_topic:            /image/L
+          cam_config_file_left:   /home/gao/ws/src/vins/config/dual/vins/cam_config_L.yaml
+          cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_L2.yaml
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+      camera1:
+          image_topic:            /image/F
+          cam_config_file_left:   /home/gao/ws/src/vins/config/dual/vins/cam_config_F.yaml
+          cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_F2.yaml
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+      camera2:
+          image_topic:            /image/R
+          cam_config_file_left:   /home/gao/ws/src/vins/config/dual/vins/cam_config_R.yaml
+          cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_R2.yaml
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+      camera3:
+         image_topic:            /image/B
+         cam_config_file_left:   /home/gao/ws/src/vins/config/dual/vins/cam_config_B.yaml
+         cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_B2.yaml
+         feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+      camera4:
+          image_topic:            /pg_17221110/image
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config_up.yaml
+          cam_config_file:        /home/gao/ws/src/vins/config/dual/vins/cam_config_up.yaml
+      camera5:
+          image_topic:            /pg_17221121/image
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config_down.yaml
+          cam_config_file:        /home/gao/ws/src/vins/config/dual/vins/cam_config_down.yaml
+  </rosparam>
+</node>
+
+
+<!--<node pkg="feature_frontend" type="monocam_node" name="feature" >
+  <rosparam>
+    image_topic:          /pg_17221110/image
+    cam_config_file:      /home/gao/ws/src/vins/config/dual/vins/cam_config_up.yaml
+    feature_config_file:  /home/gao/ws/src/vins/config/dual/vins/feature_config_up.yaml
+  </rosparam>
+</node>-->
+
+
+<node ns = "vins" name="vins" pkg="vins_so" type="vins_so" output="screen">
+    <param name="vins_folder" type="string" value="/home/gao/ws/src/vins/" />
+    <param name="num_of_cam" type="int" value="2" />
+    <param name="camera_num_stereo" type="int" value="1"/>
+    <rosparam subst_value="True">
+        vins_config_file:          /home/gao/ws/src/vins/config/dual/vins/vins_config.yaml
+        # individual setting for camera 0
+        camera0:
+            cam_config_file:        /home/gao/ws/src/vins/config/dual/vins/cam_config_up.yaml
+        camera1:
+            cam_config_file:        /home/gao/ws/src/vins/config/dual/vins/cam_config_down.yaml
+    </rosparam>
+</node>
+
+</launch>

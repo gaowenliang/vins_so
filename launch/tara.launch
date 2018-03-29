@@ -1,0 +1,25 @@
+<launch>
+
+<node pkg="feature_frontend" type="monocam_node" name="feature" >
+  <rosparam>
+    image_topic:          /cam0/image_raw
+    cam_config_file:      /home/gao/ws/src/VINS_mix/config/tara/vins/cam_config_left.yaml
+    feature_config_file:  /home/gao/ws/src/VINS_mix/config/tara/vins/feature_config.yaml
+  </rosparam>
+</node>
+
+<node ns = "vins" name="vins" pkg="vins_os" type="vins_os" output="screen">
+    <param name="vins_folder" type="string" value="/home/gao/ws/src/VINS_mix/" />
+    <param name="num_of_cam" type="int" value="1" />
+    <param name="camera_num_stereo" type="int" value="0"/>
+    <rosparam subst_value="True">
+        vins_config_file:           /home/gao/ws/src/VINS_mix/config/tara/vins/vins_config.yaml
+        # individual setting for camera 0
+        camera0:
+            cam_config_file:        /home/gao/ws/src/VINS_mix/config/tara/vins/cam_config_left.yaml
+    </rosparam>
+</node>
+
+
+
+</launch>

@@ -1,0 +1,44 @@
+<launch>
+
+    <arg name="cam_num" default = "1" />
+    <arg name="stereo_num" default = "0" />
+
+    <arg name="cam_config_path"      default = "$(find feature_frontend)/../config/jfr/vins/cam_config.yaml" />
+    <arg name="feature_config_path"     default = "$(find feature_frontend)/../config/jfr/vins/feature_config.yaml" />
+    <arg name="vins_config_path"        default = "$(find feature_frontend)/../config/jfr/vins/vins_config.yaml" />
+    <arg name="vins_path"               default = "$(find feature_frontend)/../config/../" />
+
+    <node pkg="feature_frontend" type="monocam_node" name="feature" output="screen">
+      <rosparam>
+              image_topic:          /djiros/image
+              cam_config_file:      /home/gao/ws/src/VINS_mix/config/jfr/vins/cam_config.yaml
+              feature_config_file:  /home/gao/ws/src/VINS_mix/config/jfr/vins/feature_config.yaml
+      </rosparam>
+    </node>
+
+<!--    <node ns = "vins_src" name="vins_src" pkg="vins_estimator" type="vins_estimator" output="screen">
+        <param name="vins_folder" type="string" value="$(arg vins_path)" />
+        <param name="num_of_cam" type="int" value="$(arg cam_num)" />
+        <param name="camera_num_stereo" type="int" value="$(arg stereo_num)"/>
+        <rosparam subst_value="True">
+            vins_config_file:           $(arg vins_config_path)
+            # individual setting for camera 0
+            camera0:
+                cam_config_file:        $(arg cam_config_path)
+        </rosparam>
+    </node>-->
+
+<node ns = "vins" name="vins" pkg="vins_so" type="vins_so" output="screen">
+    <param name="vins_folder" type="string" value="$(arg vins_path)" />
+    <param name="num_of_cam" type="int" value="$(arg cam_num)" />
+    <param name="camera_num_stereo" type="int" value="$(arg stereo_num)"/>
+    <rosparam subst_value="True">
+        vins_config_file:           $(arg vins_config_path)
+        # individual setting for camera 0
+        camera0:
+            cam_config_file:        $(arg cam_config_path)
+    </rosparam>
+</node>
+
+
+</launch>
