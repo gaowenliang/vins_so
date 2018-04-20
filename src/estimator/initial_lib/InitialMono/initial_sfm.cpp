@@ -10,15 +10,22 @@ GlobalSFM::triangulatePoint( Eigen::Matrix< double, 3, 4 >& Pose0,
                              Eigen::Vector3d& point1,
                              Eigen::Vector3d& point_3d )
 {
-    Matrix4d design_matrix = Matrix4d::Zero( );
-    design_matrix.row( 0 ) = point0[0] * Pose0.row( 2 ) - point0[2] * Pose0.row( 0 );
-    design_matrix.row( 1 ) = point0[1] * Pose0.row( 2 ) - point0[2] * Pose0.row( 1 );
 
-    design_matrix.row( 2 ) = point1[0] * Pose1.row( 2 ) - point1[2] * Pose1.row( 0 );
-    design_matrix.row( 3 ) = point1[1] * Pose1.row( 2 ) - point1[2] * Pose1.row( 1 );
+    Eigen::MatrixXd svd_A( 3 * 2, 4 );
+    int svd_idx = 0;
 
-    Vector4d triangulated_point;
-    triangulated_point = design_matrix.jacobiSvd( Eigen::ComputeFullV ).matrixV( ).rightCols< 1 >( );
+    svd_A.row( svd_idx++ ) = point0[1] * Pose0.row( 2 ) - point0[2] * Pose0.row( 1 );
+    svd_A.row( svd_idx++ ) = point0[2] * Pose0.row( 0 ) - point0[0] * Pose0.row( 2 );
+    svd_A.row( svd_idx++ ) = point0[0] * Pose0.row( 1 ) - point0[1] * Pose0.row( 0 );
+
+    svd_A.row( svd_idx++ ) = point1[1] * Pose1.row( 2 ) - point1[2] * Pose1.row( 1 );
+    svd_A.row( svd_idx++ ) = point1[2] * Pose1.row( 0 ) - point1[0] * Pose1.row( 2 );
+    svd_A.row( svd_idx++ ) = point1[0] * Pose1.row( 1 ) - point1[1] * Pose1.row( 0 );
+
+    Eigen::Vector4d triangulated_point = Eigen::JacobiSVD< Eigen::MatrixXd >( svd_A, //
+                                                                              Eigen::ComputeThinV )
+                                         .matrixV( )
+                                         .rightCols< 1 >( );
 
     point_3d( 0 ) = triangulated_point( 0 ) / triangulated_point( 3 );
     point_3d( 1 ) = triangulated_point( 1 ) / triangulated_point( 3 );

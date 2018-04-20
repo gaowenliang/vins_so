@@ -55,7 +55,7 @@
     </node>
 
 
-<node pkg="feature_frontend" type="dualfisheyefeaturenode" name="feature" output="screen">
+<!--<node pkg="feature_frontend" type="dualfisheyefeaturenode" name="feature" output="screen">
   <param name="camera_num_stereo" type="int" value="4"/>
   <param name="camera_num_mono" type="int" value="2"/>
   <rosparam>
@@ -88,16 +88,16 @@
           feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config_down.yaml
           cam_config_file:        /home/gao/ws/src/vins/config/dual/vins/cam_config_down.yaml
   </rosparam>
-</node>
+</node>-->
 
 
-<!--<node pkg="feature_frontend" type="monocam_node" name="feature" >
+<node pkg="feature_frontend" type="monocam_node" name="feature" >
   <rosparam>
     image_topic:          /pg_17221110/image
     cam_config_file:      /home/gao/ws/src/vins/config/dual/vins/cam_config_up.yaml
     feature_config_file:  /home/gao/ws/src/vins/config/dual/vins/feature_config_up.yaml
   </rosparam>
-</node>-->
+</node>
 
 
 <node ns = "vins" name="vins" pkg="vins_so" type="vins_so" output="screen">

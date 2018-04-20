@@ -66,7 +66,8 @@ set(initial_LIB_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/estimator/initial_lib/InitialEx/InitialEx.cpp
     ${PROJECT_SOURCE_DIR}/src/estimator/initial_lib/InitialEx/InitialExRotationCamImu.cpp
     ${PROJECT_SOURCE_DIR}/src/estimator/initial_lib/InitialEx/InitialExRotationCamCam.cpp
-    ${PROJECT_SOURCE_DIR}/src/estimator/initial_lib/VisaulImuAligment/visaulimualigment.cpp
+    ${PROJECT_SOURCE_DIR}/src/estimator/initial_lib/VisualImuAlignment/VisualImuAlignmentVel.cpp
+    ${PROJECT_SOURCE_DIR}/src/estimator/initial_lib/VisualImuAlignment/VisualImuAlignmentVelScale.cpp
     )
 set(loop_closure_LIB_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/loop-closure/ThirdParty/DBoW/BowVector.cpp

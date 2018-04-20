@@ -439,15 +439,14 @@ InitVio::InitialMonoVio::calcEx( int _frame_count )
 bool
 InitVio::InitialMonoVio::visualInitialAlign( int align_camera_index )
 {
-    VisaulImuAligment viAligment;
+    InitVio::VisualImuAlignmentVelScale viAligment;
 
     // solve scale
-    bool result = viAligment.VisualIMUAlignment( m_imageFrameAll, //
-                                                 m_Bgs,
-                                                 m_g,
-                                                 m_Xtmp,
-                                                 align_camera_index,
-                                                 true );
+    bool result = viAligment.solve( m_imageFrameAll, //
+                                    m_Bgs,
+                                    m_g,
+                                    m_Xtmp,
+                                    align_camera_index );
 
     if ( !result )
     {
