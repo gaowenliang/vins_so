@@ -1,13 +1,14 @@
 #include "vins_so/estimator/factor/ProjectionFactorSingleCam.h"
 
-Eigen::Matrix2d ProjectionFactorSingleCam::sqrt_info;
 double ProjectionFactorSingleCam::sum_t;
 
 ProjectionFactorSingleCam::ProjectionFactorSingleCam( const Eigen::Vector3d& _pts_i,
-                                                      const Eigen::Vector3d& _pts_j )
+                                                      const Eigen::Vector3d& _pts_j,
+                                                      const double& err )
 : pts_i( _pts_i )
 , pts_j( _pts_j )
 {
+    sqrt_info = 1.5 / err * Eigen::Matrix2d::Identity( );
 
 #ifdef UNIT_SPHERE_ERROR
     Eigen::Vector3d b1, b2;

@@ -102,12 +102,13 @@ FeatureManager::addFeature( int frame_count, const FeatureData& image )
         vector< FeaturePerCamera > f_per_cam;
         for ( auto& i_p : id_pts.second )
         {
-            f_per_cam.push_back( FeaturePerCamera( i_p.first, i_p.second ) );
+            f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt ) );
         }
         //        std::cout << " stereo " << f_per_cam.size( ) << std::endl;
         FeaturePerFrame f_per_fra( f_per_cam );
 
         int feature_id = id_pts.first;
+
         auto it = find_if( feature.begin( ), feature.end( ), [feature_id]( const FeaturePerId& it ) {
             return it.m_featureId == feature_id;
         } );
@@ -140,11 +141,11 @@ FeatureManager::addFeatureCamIndex( int frame_count, const FeatureData& image, i
         vector< FeaturePerCamera > f_per_cam;
         for ( auto& i_p : id_pts.second )
         {
-            int camera_id = i_p.first;
+            int camera_id = i_p.cam_id;
             if ( camera_id != camera_index )
                 continue;
 
-            f_per_cam.push_back( FeaturePerCamera( camera_id, i_p.second ) );
+            f_per_cam.push_back( FeaturePerCamera( camera_id, i_p.pt ) );
         }
         //        std::cout << " stereo " << f_per_cam.size( ) << std::endl;
         FeaturePerFrame f_per_fra( f_per_cam );
@@ -184,7 +185,7 @@ FeatureManager::addFeatureStereo( int frame_count, const FeatureData& image )
         vector< FeaturePerCamera > f_per_cam;
         for ( auto& i_p : id_pts.second )
         {
-            f_per_cam.push_back( FeaturePerCamera( i_p.first, i_p.second ) );
+            f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt ) );
         }
         FeaturePerFrame f_per_fra( f_per_cam );
 
@@ -192,9 +193,12 @@ FeatureManager::addFeatureStereo( int frame_count, const FeatureData& image )
             continue;
 
         int feature_id = id_pts.first;
-        auto it = find_if( feature.begin( ), feature.end( ), [feature_id]( const FeaturePerId& it ) {
-            return it.m_featureId == feature_id;
-        } );
+
+        auto it = find_if( feature.begin( ), //
+                           feature.end( ),
+                           [feature_id]( const FeaturePerId& it ) {
+                               return it.m_featureId == feature_id;
+                           } );
 
         if ( it == feature.end( ) )
         {
@@ -230,15 +234,18 @@ FeatureManager::addFeatureCheckParallax( int frame_count, const FeatureData& ima
         vector< FeaturePerCamera > f_per_cam;
         for ( auto& i_p : id_pts.second )
         {
-            f_per_cam.push_back( FeaturePerCamera( i_p.first, i_p.second ) );
+            f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt, i_p.err ) );
         }
         //        std::cout << " stereo " << f_per_cam.size( ) << std::endl;
         FeaturePerFrame f_per_fra( f_per_cam );
 
         int feature_id = id_pts.first;
-        auto it = find_if( feature.begin( ), feature.end( ), [feature_id]( const FeaturePerId& it ) {
-            return it.m_featureId == feature_id;
-        } );
+
+        auto it = find_if( feature.begin( ), //
+                           feature.end( ),
+                           [feature_id]( const FeaturePerId& it ) {
+                               return it.m_featureId == feature_id;
+                           } );
 
         if ( it == feature.end( ) )
         {
