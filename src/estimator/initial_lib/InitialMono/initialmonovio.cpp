@@ -77,6 +77,7 @@ InitVio::InitialMonoVio::getFeatureCamIndex( int cam_index, //
         if ( camera_id == cam_index )
         {
             Vector3d means_point = cap_feature.second.at( 0 ).second;
+
             if ( means_point.z( ) > z_the )
                 cap_image_index[feature_id].emplace_back( camera_id, means_point );
             else

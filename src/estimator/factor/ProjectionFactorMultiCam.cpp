@@ -10,7 +10,7 @@ ProjectionFactorMultiCam::ProjectionFactorMultiCam( const Eigen::Vector3d& _pts_
 {
 #ifdef UNIT_SPHERE_ERROR
     Eigen::Vector3d b1, b2;
-    Eigen::Vector3d a = pts_i;
+    Eigen::Vector3d a = pts_j.normalized( );
     Eigen::Vector3d tmp( 0, 0, 1 );
     if ( a == tmp )
         tmp << 1, 0, 0;
@@ -70,7 +70,7 @@ ProjectionFactorMultiCam::Evaluate( const double* const* parameters, double* res
         x3   = pts_camera_j2( 2 );
         // clang-format off
     norm_jaco <<
-                 1.0 / norm - x1 * x1 / pow( norm, 3 ), -x1 * x2 / pow( norm, 3 ), -x1 * x3 / pow( norm, 3 ),
+        1.0 / norm - x1 * x1 / pow( norm, 3 ), -x1 * x2 / pow( norm, 3 ), -x1 * x3 / pow( norm, 3 ),
         -x1 * x2 / pow( norm, 3 ), 1.0 / norm - x2 * x2 / pow( norm, 3 ), -x2 * x3 / pow( norm, 3 ),
         -x1 * x3 / pow( norm, 3 ), -x2 * x3 / pow( norm, 3 ), 1.0 / norm - x3 * x3 / pow( norm, 3 );
         // clang-format on

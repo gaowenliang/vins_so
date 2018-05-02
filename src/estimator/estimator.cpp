@@ -1,7 +1,7 @@
 #include "vins_so/estimator/estimator.h"
 #include <Eigen/StdVector>
 
-#define DUAL_FISHEYE 1
+//#define DUAL_FISHEYE 1
 #define MARG 1
 
 using namespace slidewindow;
@@ -72,8 +72,8 @@ Estimator::setParameter( )
         vioInitialSys->setEx( ex_ics );
     }
 
-    ProjectionFactorSingleCam::sqrt_info = 460 / 1.5 * Matrix2d::Identity( );
-    ProjectionFactorMultiCam::sqrt_info  = 460 / 1.5 * Matrix2d::Identity( );
+    ProjectionFactorSingleCam::sqrt_info = 460 / 2.5 * Matrix2d::Identity( );
+    ProjectionFactorMultiCam::sqrt_info  = 460 / 2.5 * Matrix2d::Identity( );
 
     ROS_DEBUG_STREAM( "ProjectionFactorSingleCam::sqrt_info\n"
                       << ProjectionFactorSingleCam::sqrt_info );

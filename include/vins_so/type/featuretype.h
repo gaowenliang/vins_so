@@ -9,6 +9,22 @@
 using namespace std;
 using namespace Eigen;
 
+struct VisualMeas
+{
+    VisualMeas( const int _cam_id, const double& _err, const Eigen::Vector3d& _pt )
+    : cam_id( _cam_id )
+    , err( _err )
+    , pt( _pt )
+    {
+    }
+
+    int cam_id;         // camera id of visual measurement
+    double err;         // error angle of the measurement
+    Eigen::Vector3d pt; // measurement baer vector
+};
+
+typedef std::map< int, std::vector< VisualMeas > > FeatureErrData;
+
 typedef std::map< int, std::vector< std::pair< int, Eigen::Vector3d > > > FeatureData;
 typedef std::vector< pair< Eigen::Vector3d, Eigen::Vector3d > > PointsCorres;
 
@@ -17,12 +33,19 @@ class FeaturePerCamera
     public:
     FeaturePerCamera( int _camera_id, const Vector3d& _point )
     : m_cameraId( _camera_id )
-    , m_measPoint( _point )
+    , m_measPoint( _point.normalized( ) )
+    {
+    }
+    FeaturePerCamera( int _camera_id, const Vector4d& _point )
+    : m_cameraId( _camera_id )
+    , m_measPoint( Vector3d( _point( 0 ), _point( 1 ), _point( 2 ) ).normalized( ) )
+    , m_error_angle( _point( 3 ) )
     {
     }
 
     int m_cameraId;
     Vector3d m_measPoint;
+    double m_error_angle;
 
     double m_parallax;
     double dep_gradient;

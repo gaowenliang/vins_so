@@ -11,7 +11,7 @@ ProjectionFactorSingleCam::ProjectionFactorSingleCam( const Eigen::Vector3d& _pt
 
 #ifdef UNIT_SPHERE_ERROR
     Eigen::Vector3d b1, b2;
-    Eigen::Vector3d a = pts_j;
+    Eigen::Vector3d a = pts_j.normalized( );
     Eigen::Vector3d tmp( 0, 0, 1 );
     if ( a == tmp )
         tmp << 1, 0, 0;

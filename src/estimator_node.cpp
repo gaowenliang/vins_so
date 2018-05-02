@@ -241,18 +241,35 @@ process( )
             ROS_DEBUG( "processing vision data with stamp %f \n", img_msg->header.stamp.toSec( ) );
 
             TicToc t_s;
-            FeatureData image; // map< int, vector< pair< int, Vector3d > > >
+            //            FeatureData image; // map< int, vector< pair< int, Vector3d > > >
+            FeatureData image;     // map< int, vector< pair< int, Vector3d > > >
+            FeatureErrData image2; // map< int, vector< pair< int, Vector3d > > >
             for ( unsigned int i = 0; i < img_msg->points.size( ); i++ )
             {
-                int v          = img_msg->channels[0].values[i] + 0.5;
-                int camera_id  = img_msg->channels[1].values[i];
-                int feature_id = v;
+                int feature_id = img_msg->channels[0].values[i] + 0.5; // feature id
+                int camera_id  = img_msg->channels[1].values[i];       // camera id
+                double error   = img_msg->channels[2].values[i];
+                ROS_DEBUG_STREAM( "error " << error );
+                //                int feature_id = v;
+
+                // image[feature_id].emplace_back( camera_id,
+                //                                Vector3d( img_msg->points[i].x, //
+                //                                          img_msg->points[i].y,
+                //                                          img_msg->points[i].z )
+                //                                .normalized( ) );
 
                 image[feature_id].emplace_back( camera_id,
                                                 Vector3d( img_msg->points[i].x, //
                                                           img_msg->points[i].y,
                                                           img_msg->points[i].z )
                                                 .normalized( ) );
+
+                image2[feature_id].emplace_back( camera_id,
+                                                 error,
+                                                 Vector3d( img_msg->points[i].x, //
+                                                           img_msg->points[i].y,
+                                                           img_msg->points[i].z )
+                                                 .normalized( ) );
             }
             estimator.processImage( image, img_msg->header );
 

@@ -1,0 +1,12 @@
+<launch>
+
+    <node pkg="feature_frontend" type="stereoPreprocess" name="process" >
+        <param name="is_image_show" type="bool" value="false"/>
+        <param name="down_sample_scale" type="double" value="1.0"/>
+        <remap from="/stereo/left/image_raw" to="/pg_17221110/image_raw"/>
+        <remap from="/stereo/right/image_raw" to="/pg_17221121/image_raw"/>
+        <remap from="/stereo/left/image" to="/pg_17221110/image"/>
+        <remap from="/stereo/right/image" to="/pg_17221121/image"/>
+    </node>
+
+</launch>
