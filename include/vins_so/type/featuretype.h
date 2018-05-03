@@ -13,7 +13,7 @@ struct VisualMeas
 {
     VisualMeas( const int _cam_id, const Eigen::Vector3d& _pt )
     : cam_id( _cam_id )
-    , err( 0.0 )
+    , err( 1.0 / 460 )
     , pt( _pt )
     {
     }
@@ -38,6 +38,7 @@ class FeaturePerCamera
     FeaturePerCamera( int _camera_id, const Vector3d& _point )
     : m_cameraId( _camera_id )
     , m_measPoint( _point.normalized( ) )
+    , m_errAngle( 1.0 / 460 )
     {
     }
     FeaturePerCamera( int _camera_id, const Vector3d& _point, const double& _error )

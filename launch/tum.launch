@@ -1,6 +1,6 @@
 <launch>
 
-<!--<node pkg="feature_frontend" type="stereocam_node" name="feature" >
+<node pkg="feature_frontend" type="stereocam_node" name="feature" >
     <param name="camera_num_stereo" type="int" value="1"/>
     <rosparam subst_value="True">
         camera0:
@@ -8,18 +8,20 @@
             image_topic_right:      /cam1/image_raw
             cam_config_file_left:   /home/gao/ws/src/vins/config/tum/vins/cam_config_left.yaml
             cam_config_file_right:  /home/gao/ws/src/vins/config/tum/vins/cam_config_right.yaml
+            error_config_left:      /home/gao/ws/src/vins/config/tum/vins/cam_err_left
+            error_config_right:     /home/gao/ws/src/vins/config/tum/vins/cam_err_right
             feature_config_file:    /home/gao/ws/src/vins/config/tum/vins/feature_config.yaml
      </rosparam>
-</node>-->
+</node>
 
-<node pkg="feature_frontend" type="monocam_node" name="feature"  output="screen">
+<!--<node pkg="feature_frontend" type="monocam_node" name="feature"  output="screen">
   <rosparam>
     image_topic:          /cam0/image_raw
     cam_config_file:      /home/gao/ws/src/vins/config/tum/vins/cam_config_left.yaml
-    error_config_file:    /home/gao/ws/src/vins/config/tum/vins/left_cam_err
+    error_config_file:    /home/gao/ws/src/vins/config/tum/vins/cam_err_left
     feature_config_file:  /home/gao/ws/src/vins/config/tum/vins/feature_config.yaml
   </rosparam>
-</node>
+</node>-->
 
 <node ns = "vins" name="vins" pkg="vins_so" type="vins_so" output="screen">
     <param name="vins_folder" type="string" value="/home/gao/ws/src/vins/" />

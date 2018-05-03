@@ -145,7 +145,7 @@ FeatureManager::addFeatureCamIndex( int frame_count, const FeatureData& image, i
             if ( camera_id != camera_index )
                 continue;
 
-            f_per_cam.push_back( FeaturePerCamera( camera_id, i_p.pt ) );
+            f_per_cam.push_back( FeaturePerCamera( camera_id, i_p.pt, i_p.err ) );
         }
         //        std::cout << " stereo " << f_per_cam.size( ) << std::endl;
         FeaturePerFrame f_per_fra( f_per_cam );
@@ -185,7 +185,7 @@ FeatureManager::addFeatureStereo( int frame_count, const FeatureData& image )
         vector< FeaturePerCamera > f_per_cam;
         for ( auto& i_p : id_pts.second )
         {
-            f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt ) );
+            f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt, i_p.err ) );
         }
         FeaturePerFrame f_per_fra( f_per_cam );
 
