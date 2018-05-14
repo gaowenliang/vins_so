@@ -27,7 +27,7 @@ ProjectionFactorMultiCam::ProjectionFactorMultiCam( const Eigen::Vector3d& _pts_
 bool
 ProjectionFactorMultiCam::Evaluate( const double* const* parameters, double* residuals, double** jacobians ) const
 {
-    sys_utils::TicToc tic_toc;
+    sys_utils::tic::TicToc tic_toc;
     Eigen::Vector3d Pi( parameters[0][0], parameters[0][1], parameters[0][2] );
     Eigen::Quaterniond Qi( parameters[0][6], parameters[0][3], parameters[0][4], parameters[0][5] );
 
