@@ -214,6 +214,7 @@ FeatureManager::addFeatureStereo( int frame_count, const FeatureData& image )
 
     if ( frame_count < 2 || last_track_num < 20 )
         return true;
+    return true;
 }
 
 bool
