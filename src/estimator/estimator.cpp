@@ -1,7 +1,7 @@
 #include "vins_so/estimator/estimator.h"
 #include <Eigen/StdVector>
 
-#define DUAL_FISHEYE 1
+//#define DUAL_FISHEYE 1
 #define MARG 1
 
 using namespace slidewindow;
@@ -71,12 +71,6 @@ Estimator::setParameter( )
 
         vioInitialSys->setEx( ex_ics );
     }
-
-    ProjectionFactorSingleCam::sqrt_info = 460 / 1.5 * Matrix2d::Identity( );
-    ProjectionFactorMultiCam::sqrt_info  = 460 / 1.5 * Matrix2d::Identity( );
-
-    ROS_DEBUG_STREAM( "ProjectionFactorSingleCam::sqrt_info\n"
-                      << ProjectionFactorSingleCam::sqrt_info );
 }
 
 void
@@ -489,9 +483,11 @@ Estimator::optimization( )
             {
                 if ( camera_id_i == it_per_cam.m_cameraId )
                 {
-                    Vector3d pts_j = it_per_cam.m_measPoint;
+                    Vector3d pts_j  = it_per_cam.m_measPoint;
+                    double errAngle = it_per_cam.m_errAngle;
 
-                    ProjectionFactorSingleCam* f = new ProjectionFactorSingleCam( pts_i, pts_j );
+                    ProjectionFactorSingleCam* f
+                    = new ProjectionFactorSingleCam( pts_i, pts_j, errAngle );
 
                     problem.AddResidualBlock( f,
                                               loss_function,
@@ -505,8 +501,9 @@ Estimator::optimization( )
                 {
                     Vector3d pts_j  = it_per_cam.m_measPoint;
                     int camera_id_j = it_per_cam.m_cameraId;
+                    double errAngle = it_per_cam.m_errAngle;
 
-                    ProjectionFactorMultiCam* f = new ProjectionFactorMultiCam( pts_i, pts_j );
+                    ProjectionFactorMultiCam* f = new ProjectionFactorMultiCam( pts_i, pts_j, errAngle );
                     problem.AddResidualBlock( f,
                                               loss_function,
                                               paraPose[imu_i],
@@ -625,10 +622,11 @@ Estimator::optimization( )
                     {
                         if ( camera_id_i == it_per_cam.m_cameraId )
                         {
-                            Vector3d pts_j = it_per_cam.m_measPoint;
+                            Vector3d pts_j  = it_per_cam.m_measPoint;
+                            double errAngle = it_per_cam.m_errAngle;
 
                             ProjectionFactorSingleCam* f
-                            = new ProjectionFactorSingleCam( pts_i, pts_j );
+                            = new ProjectionFactorSingleCam( pts_i, pts_j, errAngle );
 
                             ResidualBlockInfo* residual_block_info
                             = new ResidualBlockInfo( f,
@@ -646,8 +644,10 @@ Estimator::optimization( )
                         {
                             Vector3d pts_j  = it_per_cam.m_measPoint;
                             int camera_id_j = it_per_cam.m_cameraId;
+                            double errAngle = it_per_cam.m_errAngle;
 
-                            ProjectionFactorMultiCam* f = new ProjectionFactorMultiCam( pts_i, pts_j );
+                            ProjectionFactorMultiCam* f
+                            = new ProjectionFactorMultiCam( pts_i, pts_j, errAngle );
 
                             ResidualBlockInfo* residual_block_info
                             = new ResidualBlockInfo( f,

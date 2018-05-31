@@ -240,6 +240,7 @@ MotionEstimator::solveRelativeRT( const vector< pair< Vector3d, Vector3d > >& co
         for ( int i = 0; i < 3; i++ )
         {
             T( i ) = trans.at< double >( i, 0 );
+
             for ( int j = 0; j < 3; j++ )
                 R( i, j ) = rot.at< double >( i, j );
         }

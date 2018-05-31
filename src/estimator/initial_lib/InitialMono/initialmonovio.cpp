@@ -72,11 +72,12 @@ InitVio::InitialMonoVio::getFeatureCamIndex( int cam_index, //
     for ( auto& cap_feature : _points )
     {
         int feature_id = cap_feature.first;
-        int camera_id  = cap_feature.second.at( 0 ).first;
+        int camera_id  = cap_feature.second.at( 0 ).cam_id;
 
         if ( camera_id == cam_index )
         {
-            Vector3d means_point = cap_feature.second.at( 0 ).second;
+            Vector3d means_point = cap_feature.second.at( 0 ).pt;
+
             if ( means_point.z( ) > z_the )
                 cap_image_index[feature_id].emplace_back( camera_id, means_point );
             else
@@ -250,7 +251,7 @@ InitVio::InitialMonoVio::initialStructure( )
                         Vector3d world_pts = it->second;
                         pts_3_vector_tmp.push_back( world_pts );
 
-                        Vector3d img_pts = i_p.second.head< 3 >( );
+                        Vector3d img_pts = i_p.pt;
                         pts_2_vector_tmp.push_back( img_pts );
                     }
                 }
@@ -439,15 +440,14 @@ InitVio::InitialMonoVio::calcEx( int _frame_count )
 bool
 InitVio::InitialMonoVio::visualInitialAlign( int align_camera_index )
 {
-    VisaulImuAligment viAligment;
+    InitVio::VisualImuAlignmentVelScale viAligment;
 
     // solve scale
-    bool result = viAligment.VisualIMUAlignment( m_imageFrameAll, //
-                                                 m_Bgs,
-                                                 m_g,
-                                                 m_Xtmp,
-                                                 align_camera_index,
-                                                 true );
+    bool result = viAligment.solve( m_imageFrameAll, //
+                                    m_Bgs,
+                                    m_g,
+                                    m_Xtmp,
+                                    align_camera_index );
 
     if ( !result )
     {

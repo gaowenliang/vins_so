@@ -31,7 +31,7 @@ class InitialSys
     , num_camera( _num_camera )
     , m_exParamSet( false )
     {
-        if ( tf_ics.size( ) != _num_camera )
+        if ( int( tf_ics.size( ) ) != _num_camera )
         {
             std::cout
             << "[ERROR] error eith camera extrinsic parameters set in InitialSys.\n";

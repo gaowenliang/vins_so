@@ -1,5 +1,5 @@
 #include "vins_so/estimator/initial_lib/InitialStereoPnP/initialstereoviopnp.h"
-#include "vins_so/estimator/initial_lib/VisaulImuAligment/visaulimualigment.h"
+#include "vins_so/estimator/initial_lib/VisualImuAlignment/VisualImuAlignmentVel.h"
 
 InitVio::InitialStereoVioPnP::InitialStereoVioPnP( int window_size, int camera_size )
 : Initial( window_size, camera_size )
@@ -180,16 +180,15 @@ InitVio::InitialStereoVioPnP::initial( )
 
     if ( m_imageFrameAll.size( ) > 3 && m_window->m_featureManager.getFeatureCountStereo( ) > 20 )
     {
-        VisaulImuAligment viAligment;
+        InitVio::VisualImuAlignmentVel viAligment;
 
         int align_camera_index = 0;
 
-        bool result = viAligment.VisualIMUAlignment( m_imageFrameAll, //
-                                                     m_Bgs,
-                                                     m_g,
-                                                     m_Xtmp,
-                                                     align_camera_index,
-                                                     false );
+        bool result = viAligment.solve( m_imageFrameAll, //
+                                        m_Bgs,
+                                        m_g,
+                                        m_Xtmp,
+                                        align_camera_index );
 
         if ( !result )
         {

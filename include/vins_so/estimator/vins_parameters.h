@@ -69,11 +69,11 @@ enum SIZE_PARAMETERIZATION
 
 enum StateOrder
 {
-    O_P  = 0,
-    O_R  = 3,
-    O_V  = 6,
-    O_BA = 9,
-    O_BG = 12
+    O_P  = 0, // position
+    O_R  = 3, // oreitation
+    O_V  = 6, // velocity
+    O_BA = 9, // bias of accelerometer
+    O_BG = 12 // bias of gyroscope
 };
 
 enum NoiseOrder

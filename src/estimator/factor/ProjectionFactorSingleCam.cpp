@@ -1,17 +1,18 @@
 #include "vins_so/estimator/factor/ProjectionFactorSingleCam.h"
 
-Eigen::Matrix2d ProjectionFactorSingleCam::sqrt_info;
 double ProjectionFactorSingleCam::sum_t;
 
 ProjectionFactorSingleCam::ProjectionFactorSingleCam( const Eigen::Vector3d& _pts_i,
-                                                      const Eigen::Vector3d& _pts_j )
+                                                      const Eigen::Vector3d& _pts_j,
+                                                      const double& err )
 : pts_i( _pts_i )
 , pts_j( _pts_j )
 {
+    sqrt_info = 1.5 / err * Eigen::Matrix2d::Identity( );
 
 #ifdef UNIT_SPHERE_ERROR
     Eigen::Vector3d b1, b2;
-    Eigen::Vector3d a = pts_j;
+    Eigen::Vector3d a = pts_j.normalized( );
     Eigen::Vector3d tmp( 0, 0, 1 );
     if ( a == tmp )
         tmp << 1, 0, 0;
@@ -25,7 +26,7 @@ ProjectionFactorSingleCam::ProjectionFactorSingleCam( const Eigen::Vector3d& _pt
 bool
 ProjectionFactorSingleCam::Evaluate( const double* const* parameters, double* residuals, double** jacobians ) const
 {
-    sys_utils::TicToc tic_toc;
+    sys_utils::tic::TicToc tic_toc;
     Eigen::Vector3d Pi( parameters[0][0], parameters[0][1], parameters[0][2] );
     Eigen::Quaterniond Qi( parameters[0][6], parameters[0][3], parameters[0][4], parameters[0][5] );
 

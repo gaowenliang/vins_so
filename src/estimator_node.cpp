@@ -244,11 +244,12 @@ process( )
             FeatureData image; // map< int, vector< pair< int, Vector3d > > >
             for ( unsigned int i = 0; i < img_msg->points.size( ); i++ )
             {
-                int v          = img_msg->channels[0].values[i] + 0.5;
-                int camera_id  = img_msg->channels[1].values[i];
-                int feature_id = v;
+                int feature_id = img_msg->channels[0].values[i] + 0.5; // feature id
+                int camera_id  = img_msg->channels[1].values[i];       // camera id
+                double error   = img_msg->channels[2].values[i];       // error angle
 
                 image[feature_id].emplace_back( camera_id,
+                                                error,
                                                 Vector3d( img_msg->points[i].x, //
                                                           img_msg->points[i].y,
                                                           img_msg->points[i].z )

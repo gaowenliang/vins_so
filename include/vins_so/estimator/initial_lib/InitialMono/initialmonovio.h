@@ -5,7 +5,7 @@
 #include "solve_5pts.h"
 #include "vins_so/estimator/initial_lib/InitialBase/initialbase.h"
 #include "vins_so/estimator/initial_lib/InitialEx/InitialExRotationCamImu.h"
-#include "vins_so/estimator/initial_lib/VisaulImuAligment/visaulimualigment.h"
+#include "vins_so/estimator/initial_lib/VisualImuAlignment/VisualImuAlignmentVelScale.h"
 #include "vins_so/estimator/slideWindow/slidewindowimu.h"
 #include "vins_so/utility/tic_toc.h"
 #include <code_utils/cv_utils/pnp/pnp.h>
