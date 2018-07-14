@@ -22,6 +22,7 @@ class SlideWindowIMU : public SlideWindowBase
     void predictWindow( Tf& _tf, Vector3d& _vel, double dt, int frame_count, const Vector3d& acc, const Vector3d& gyr );
     void predictLast( ) {}
     void setG( const Vector3d& G );
+    bool checkObservibility( );
     SlideWindowIMU& operator=( const SlideWindowIMU& other );
     void setPreIntegrationsIndex( ImuPreintPtr preIntegration, int index );
 

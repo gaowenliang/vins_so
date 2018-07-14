@@ -246,10 +246,8 @@ Estimator::vector2double( )
 
     int num_of_depth = 0;
     VectorXd dep = pWindow->m_featureManager.getDepth( num_of_depth, para_Feature_CameraID );
-    ROS_WARN_STREAM( "feature size " << pWindow->m_featureManager.getFeatureCount( )
-                                     << ", mono "
-                                     << pWindow->m_featureManager.getFeatureCountMono( )
-                                     << ", stereo "
+    ROS_WARN_STREAM( "feature size " << pWindow->m_featureManager.getFeatureCount( ) << ", mono "
+                                     << pWindow->m_featureManager.getFeatureCountMono( ) << ", stereo "
                                      << pWindow->m_featureManager.getFeatureCountStereo( ) );
 
     for ( int i = 0; i < num_of_depth; i++ )
@@ -275,16 +273,17 @@ Estimator::double2vector( )
                                                        paraPose[0][4],
                                                        paraPose[0][5] )
                                           .toRotationMatrix( ) );
-    double y_diff = origin_R0.x( ) - origin_R00.x( );
+    double y_diff       = origin_R0.x( ) - origin_R00.x( );
 
     Matrix3d rot_diff = Utility::ypr2R( Vector3d( y_diff, 0, 0 ) );
 
     for ( int i = 0; i <= WINDOW_SIZE; i++ )
     {
         pWindow->setPoseIndex( i,
-                               rot_diff * Vector3d( paraPose[i][0] - paraPose[0][0],
-                                                    paraPose[i][1] - paraPose[0][1],
-                                                    paraPose[i][2] - paraPose[0][2] )
+                               rot_diff
+                               * Vector3d( paraPose[i][0] - paraPose[0][0],
+                                           paraPose[i][1] - paraPose[0][1],
+                                           paraPose[i][2] - paraPose[0][2] )
                                + origin_P0,
                                rot_diff
                                * Quaterniond( paraPose[i][6], //
@@ -295,9 +294,10 @@ Estimator::double2vector( )
                                  .toRotationMatrix( ) );
 
         pWindow->setVelIndex( i,
-                              rot_diff * Vector3d( paraSpeed[i][0], //
-                                                   paraSpeed[i][1],
-                                                   paraSpeed[i][2] ) );
+                              rot_diff
+                              * Vector3d( paraSpeed[i][0], //
+                                          paraSpeed[i][1],
+                                          paraSpeed[i][2] ) );
 
         pImu->setBiasAccIndex( i, Vector3d( paraBias[i][0], paraBias[i][1], paraBias[i][2] ) );
         pImu->setBiasGyroIndex( i, Vector3d( paraBias[i][3], paraBias[i][4], paraBias[i][5] ) );
@@ -335,7 +335,7 @@ Estimator::double2vector( )
 
     int num_of_depth = 0;
     VectorXd dep = pWindow->m_featureManager.getDepth( num_of_depth, para_Feature_CameraID );
-    for ( int i  = 0; i < num_of_depth; i++ )
+    for ( int i = 0; i < num_of_depth; i++ )
         dep( i ) = paraFeature[i][0];
     //    ROS_DEBUG_STREAM( " dep " << endl << dep );
     pWindow->m_featureManager.setDepth( dep );
@@ -410,13 +410,11 @@ Estimator::optimization( )
         ROS_DEBUG_STREAM( "optimization CAM " << i );
         ceres::LocalParameterization* local_parameterization = new PoseLocalParameterization( );
         problem.AddParameterBlock( paraExPose[i], SIZE_POSE, local_parameterization );
-        if ( !ESTIMATE_EXTRINSIC )
+        if ( !ESTIMATE_EXTRINSIC || !pImu->checkObservibility( ) )
         {
             ROS_DEBUG( "fix extinsic param" );
             problem.SetParameterBlockConstant( paraExPose[i] );
         }
-        else
-            ROS_DEBUG( "estimate extinsic param" );
     }
 
     TicToc t_whole, t_prepare;
@@ -511,7 +509,7 @@ Estimator::optimization( )
                                               paraFeature[feature_index],
                                               paraExPose[camera_id_i], //
                                               paraExPose[camera_id_j]  //
-                                              );
+                    );
                 }
                 f_m_cnt++;
             }
