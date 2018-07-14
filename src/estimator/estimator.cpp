@@ -410,7 +410,16 @@ Estimator::optimization( )
         ROS_DEBUG_STREAM( "optimization CAM " << i );
         ceres::LocalParameterization* local_parameterization = new PoseLocalParameterization( );
         problem.AddParameterBlock( paraExPose[i], SIZE_POSE, local_parameterization );
-        if ( !ESTIMATE_EXTRINSIC || !pImu->checkObservibility( ) )
+
+        if ( ESTIMATE_EXTRINSIC )
+        {
+            if ( !pImu->checkObservibility( ) )
+            {
+                ROS_DEBUG( "fix extinsic param" );
+                problem.SetParameterBlockConstant( paraExPose[i] );
+            }
+        }
+        else
         {
             ROS_DEBUG( "fix extinsic param" );
             problem.SetParameterBlockConstant( paraExPose[i] );
