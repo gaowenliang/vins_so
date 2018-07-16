@@ -202,8 +202,8 @@ send_imu( const sensor_msgs::ImuConstPtr& imu_msg )
     double t = imu_msg->header.stamp.toSec( );
     if ( current_time < 0 )
         current_time = t;
-    double dt        = t - current_time;
-    current_time     = t;
+    double dt    = t - current_time;
+    current_time = t;
 
     double ba[]{ 0.0, 0.0, 0.0 };
     double bg[]{ 0.0, 0.0, 0.0 };
@@ -300,7 +300,7 @@ main( int argc, char** argv )
 {
     ros::init( argc, argv, "vins_estimator" );
     ros::NodeHandle n( "~" );
-    ros::console::set_logger_level( ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug );
+    ros::console::set_logger_level( ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info );
     readParameters( n );
 
     estimator.initEstimator( WINDOW_SIZE, NUM_OF_CAM );

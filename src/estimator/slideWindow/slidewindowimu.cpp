@@ -11,25 +11,39 @@ SlideWindowIMU::setG( const Vector3d& G )
 bool
 SlideWindowIMU::checkObservibility( )
 {
-    Vector3d sum_g;
+    Vector3d sum_g( 0.0, 0.0, 0.0 );
+    int imu_cnt = 0;
+
     for ( auto& imu : m_preIntegrations )
     {
-        double dt      = imu->sum_dt;
-        Vector3d tmp_g = imu->delta_v / dt;
-        sum_g += tmp_g;
+        if ( imu != nullptr )
+        {
+            double dt      = imu->sum_dt;
+            Vector3d tmp_g = imu->delta_v / dt;
+            sum_g += tmp_g;
+            ++imu_cnt;
+        }
     }
+    if ( imu_cnt < 5 )
+        return false;
     Vector3d aver_g;
-    aver_g     = sum_g * 1.0 / ( ( int )m_preIntegrations.size( ) - 1 );
+    aver_g = sum_g * 1.0 / imu_cnt;
+
     double var = 0;
     for ( auto& imu : m_preIntegrations )
     {
-        double dt      = imu->sum_dt;
-        Vector3d tmp_g = imu->delta_v / dt;
-        var += ( tmp_g - aver_g ).transpose( ) * ( tmp_g - aver_g );
+        if ( imu != nullptr )
+        {
+            double dt      = imu->sum_dt;
+            Vector3d tmp_g = imu->delta_v / dt;
+            var += ( tmp_g - aver_g ).transpose( ) * ( tmp_g - aver_g );
+        }
     }
-    var = sqrt( var / ( ( int )m_preIntegrations.size( ) - 1 ) );
+    var = sqrt( var / imu_cnt );
 
-    if ( var < 0.25 )
+    std::cout << "IMU var " << var << "\n";
+
+    if ( var < 0.2 )
     {
         ROS_INFO( "IMU excitation not enouth!" );
         return false;

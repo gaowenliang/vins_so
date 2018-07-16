@@ -106,6 +106,7 @@
     image_topic:          /pg_17221110/image_raw
     cam_config_file:      /home/gao/ws/src/vins/config/dual/vins/cam_config_up.yaml
     feature_config_file:  /home/gao/ws/src/vins/config/dual/vins/feature_config_up.yaml
+    error_config_file:      /home/gao/ws/src/vins/feature_frontend/data/up_cam
   </rosparam>
 </node>-->
 

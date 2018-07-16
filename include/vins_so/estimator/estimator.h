@@ -90,6 +90,9 @@ class Estimator
     bool is_valid, is_key;
     bool failure_occur;
 
+    int cnt_imu_obseve;
+    bool is_imu_obseve;
+
     vector< Vector3d > point_cloud;
     vector< Vector3d > margin_cloud;
     vector< Vector3d > key_poses;

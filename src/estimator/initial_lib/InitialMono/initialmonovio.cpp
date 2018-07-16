@@ -30,8 +30,7 @@ InitVio::InitialMonoVio::pushImage( double time, int _frame_count, const Feature
     m_window->Stamps[_frame_count] = time;
 
     ROS_WARN_STREAM( "num " << m_exParams.size( ) << " checkEx( ) " << checkEx( )
-                            << " m_exParamSet "
-                            << m_exParamSet );
+                            << " m_exParamSet " << m_exParamSet );
 
     if ( !checkEx( ) )
     {
@@ -114,7 +113,9 @@ InitVio::InitialMonoVio::initialStructure( )
     {
         map< double, ImageImuFrame >::iterator frame_it;
         Vector3d sum_g;
-        for ( frame_it = m_imageFrameAll.begin( ), frame_it++; frame_it != m_imageFrameAll.end( ); frame_it++ )
+        for ( frame_it = m_imageFrameAll.begin( ), frame_it++; //
+              frame_it != m_imageFrameAll.end( );
+              frame_it++ )
         {
             double dt      = frame_it->second.preIntegration->sum_dt;
             Vector3d tmp_g = frame_it->second.preIntegration->delta_v / dt;
@@ -134,7 +135,7 @@ InitVio::InitialMonoVio::initialStructure( )
         // ROS_WARN("IMU variation %f!", var);
         if ( var < 0.25 )
         {
-            ROS_INFO( "IMU excitation not enouth!" );
+            ROS_INFO( "IMU excitation %f, not enouth!", var );
             // return false;
         }
     }
@@ -488,8 +489,7 @@ InitVio::InitialMonoVio::relativePose( Matrix3d& relative_R, Vector3d& relative_
                 l = i;
                 ROS_DEBUG_STREAM( "camera " << m_cameraIndex << " points: " << corres.size( ) << "\n"
                                             << "RR\n"
-                                            << relative_R
-                                            << "\nTT\n"
+                                            << relative_R << "\nTT\n"
                                             << relative_T );
 
                 ROS_DEBUG(

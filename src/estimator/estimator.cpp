@@ -101,6 +101,9 @@ Estimator::clearState( )
     initial_timestamp = 0;
     relocalize        = false;
 
+    cnt_imu_obseve = 0;
+    is_imu_obseve  = false;
+
     relocalize_t = Eigen::Vector3d( 0, 0, 0 );
     relocalize_r = Eigen::Matrix3d::Identity( );
 
@@ -158,6 +161,14 @@ Estimator::processImage( const FeatureData& image, const std_msgs::Header& heade
     {
         vioInitialSys->pushImage( header.stamp.toSec( ), frame_count, image );
         vioInitialSys->resetImu( acc_0, gyr_0, pImu->m_Bas[frame_count], pImu->m_Bgs[frame_count] );
+    }
+
+    if ( !is_imu_obseve )
+    {
+        if ( pImu->checkObservibility( ) )
+            cnt_imu_obseve++;
+        if ( cnt_imu_obseve > 2 )
+            is_imu_obseve = true;
     }
 
     if ( solver_flag == INITIAL )
@@ -405,6 +416,7 @@ Estimator::optimization( )
         problem.AddParameterBlock( paraSpeed[i], SIZE_SPEED );
         problem.AddParameterBlock( paraBias[i], SIZE_BIAS );
     }
+
     for ( int i = 0; i < NUM_OF_CAM; i++ )
     {
         ROS_DEBUG_STREAM( "optimization CAM " << i );
@@ -413,7 +425,7 @@ Estimator::optimization( )
 
         if ( ESTIMATE_EXTRINSIC )
         {
-            if ( !pImu->checkObservibility( ) )
+            if ( !is_imu_obseve )
             {
                 ROS_DEBUG( "fix extinsic param" );
                 problem.SetParameterBlockConstant( paraExPose[i] );

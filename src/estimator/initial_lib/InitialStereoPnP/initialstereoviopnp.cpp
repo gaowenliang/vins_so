@@ -20,8 +20,7 @@ InitVio::InitialStereoVioPnP::pushImage( double time, int _frame_count, const Fe
     InitVio::ImageImuFrame image_imu_info( _points, m_tmpPreIntegration, time );
     m_imageFrameAll.insert( std::make_pair( time, image_imu_info ) );
 
-    ROS_DEBUG( "STEREO INIT, frame is------------------%s",
-               m_window->m_margFlag ? "reject" : "accept" );
+    ROS_DEBUG( "STEREO INIT, frame is------------------%s", m_window->m_margFlag ? "reject" : "accept" );
     ROS_DEBUG( "STEREO INIT, %s", m_window->m_margFlag ? "Non-keyframe" : "Keyframe" );
     ROS_DEBUG( "STEREO INIT, number of feature: %d",
                m_window->m_featureManager.getFeatureCountStereo( ) );
@@ -144,8 +143,12 @@ InitVio::InitialStereoVioPnP::copyInitInfoBack( slidewindow::SlideWindowPoseVelP
             preIntegration->repropagate( Vector3d::Zero( ), imu_new->m_Bgs[i] );
             // imu_new->setPreIntegrationsIndex( frame_it->second.preIntegration, i );
             std::swap( imu_new->m_preIntegrations[i], preIntegration );
+            // std::cout << "delta_v" << i << " "
+            //           << imu_new->m_preIntegrations[i]->delta_v.transpose( ) << "\n";
         }
     }
+
+    std::cout << "\n";
 
     /// --------------------------------------
     /// rotation the yaw from the first frame
@@ -323,7 +326,7 @@ InitVio::InitialStereoVioPnP::initPnP( int frame )
     std::cout << "allFrameAll size: " << m_imageFrameAll.size( ) << std::endl;
 
     map< double, ImageImuFrame >::iterator frame_i = std::prev( m_imageFrameAll.end( ) );
-    frame_i->second.tf_wb = m_window->Pose[frame];
+    frame_i->second.tf_wb                          = m_window->Pose[frame];
 }
 
 void
