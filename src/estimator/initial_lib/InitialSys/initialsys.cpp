@@ -1,5 +1,54 @@
 #include "vins_so/estimator/initial_lib/InitialSys/initialsys.h"
 
+InitVio::InitialSys::InitialSys( int _num_camera, int _num_stereo )
+: done( false )
+, num_stereo( _num_stereo )
+, num_camera( _num_camera )
+, m_exParamSet( false )
+{
+    m_Ex_ics.resize( _num_camera );
+
+    initClear( );
+    initReset( );
+}
+
+InitVio::InitialSys::InitialSys( int _num_camera, int _num_stereo, std::vector< Tf > tf_ics )
+: done( false )
+, num_stereo( _num_stereo )
+, num_camera( _num_camera )
+, m_exParamSet( false )
+{
+    if ( int( tf_ics.size( ) ) != _num_camera )
+    {
+        std::cout << "[ERROR] error eith camera extrinsic parameters set in InitialSys.\n";
+    }
+    m_Ex_ics.resize( _num_camera );
+
+    setEx( tf_ics );
+    initClear( );
+    initReset( );
+}
+
+InitVio::InitialSys::InitialSys( int _num_camera,
+                                 int _num_stereo,
+                                 std::vector< Tf > tf_ics,
+                                 std::vector< std::pair< int, int > > stereo_cam_ids )
+: done( false )
+, num_stereo( _num_stereo )
+, num_camera( _num_camera )
+, m_exParamSet( false )
+{
+    if ( int( tf_ics.size( ) ) != _num_camera )
+    {
+        std::cout << "[ERROR] error eith camera extrinsic parameters set in InitialSys.\n";
+    }
+    m_Ex_ics.resize( _num_camera );
+
+    setEx( tf_ics );
+    initClear( );
+    initReset( stereo_cam_ids );
+}
+
 bool
 InitVio::InitialSys::initial( )
 {
@@ -140,7 +189,7 @@ InitVio::InitialSys::initReset( )
             vioInitMono[camera_index] = InitialGen::instance( )->generateInit( InitVio::MONO );
 
             vioInitMono[camera_index]->clear( );
-            vioInitMono[camera_index]->setAlignCameraIndex( camera_index );
+            vioInitMono[camera_index]->setCameraIndex( camera_index );
         }
 
     for ( int camera_index = 0; camera_index < num_stereo; ++camera_index )
@@ -151,6 +200,35 @@ InitVio::InitialSys::initReset( )
         vioInitStereo[camera_index] = InitialGen::instance( )->generateInit( InitVio::STEREO_PNP );
         vioInitStereo[camera_index]->clear( );
     }
+}
+
+void
+InitVio::InitialSys::initReset( std::vector< std::pair< int, int > > stereo_cam_ids )
+{
+
+    if ( !done )
+        for ( int camera_index = 0; camera_index < num_camera; ++camera_index )
+        {
+            if ( vioInitMono[camera_index] != nullptr )
+                vioInitMono[camera_index].reset( );
+
+            vioInitMono[camera_index] = InitialGen::instance( )->generateInit( InitVio::MONO );
+
+            vioInitMono[camera_index]->clear( );
+            vioInitMono[camera_index]->setCameraIndex( camera_index );
+        }
+
+    if ( num_stereo == stereo_cam_ids.size( ) )
+        for ( int camera_index = 0; camera_index < num_stereo; ++camera_index )
+        {
+            if ( vioInitStereo[camera_index] != nullptr )
+                vioInitStereo[camera_index].reset( );
+
+            vioInitStereo[camera_index] = InitialGen::instance( )->generateInit( InitVio::STEREO_PNP );
+            vioInitStereo[camera_index]->clear( );
+            vioInitStereo[camera_index]->setCameraIndex( stereo_cam_ids[camera_index].first );
+            vioInitStereo[camera_index]->addCameraIndex( stereo_cam_ids[camera_index].second );
+        }
 }
 
 bool

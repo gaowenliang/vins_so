@@ -31,7 +31,10 @@ class FeatureManager
     bool addFeature( int frame_count, const FeatureData& image );
     bool addFeatureCamIndex( int frame_count, const FeatureData& image, int camera_index );
     bool addFeatureStereo( int frame_count, const FeatureData& image );
+    bool addFeatureStereoIndex( int frame_count, const FeatureData& image, int camera_index, int camera_index2 );
     bool addFeatureCheckParallax( int frame_count, const FeatureData& image );
+    bool addFeatureCheckParallax( int frame_count, const FeatureData& image, int max_camid );
+
     void debugShow( );
 
     vector< PointsCorres > getCorresponding( int frame_count_l, int frame_count_r );
@@ -43,7 +46,7 @@ class FeatureManager
     void setDepthCamIndex( const VectorXd& x, const int camera_index );
     void clearDepth( );
     void clearDepthCamIndex( const int camera_index );
-    VectorXd getDepth( int& num_of_depth, std::vector< int >& camera_ids );
+    VectorXd getDepth( int& num_of_depth );
     VectorXd getDepthCamIndex( int& num_of_depth, int camera_index );
 
     void triangulate( const std::vector< Tf > Tf_wi, const std::vector< Tf > Tf_ic );

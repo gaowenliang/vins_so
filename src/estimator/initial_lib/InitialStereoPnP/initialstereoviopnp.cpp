@@ -10,7 +10,8 @@ InitVio::InitialStereoVioPnP::InitialStereoVioPnP( int window_size, int camera_s
 void
 InitVio::InitialStereoVioPnP::pushImage( double time, int _frame_count, const FeatureData& _points )
 {
-    m_window->m_featureManager.addFeatureStereo( _frame_count, _points );
+    m_window->m_featureManager.addFeatureStereoIndex( _frame_count, _points, m_cameraIndex, m_cameraIndex2 );
+    //    m_window->m_featureManager.addFeatureStereo( _frame_count, _points );
 
     if ( m_window->m_featureManager.getFeatureCountStereo( ) < 10 )
         m_window->setMargSecondNew( );
@@ -264,9 +265,10 @@ InitVio::InitialStereoVioPnP::initPnP( int frame )
 
         Vector3d point_w = it_per_id.m_position_w;
         Vector3d measure_l;
-        if ( it_per_id.m_fPerFrame[this_frame].m_fPerCam[0].m_cameraId == 0 )
+
+        if ( it_per_id.m_fPerFrame[this_frame].m_fPerCam[0].m_cameraId == m_cameraIndex )
             measure_l = it_per_id.m_fPerFrame[this_frame].m_fPerCam[0].m_measPoint;
-        else if ( it_per_id.m_fPerFrame[this_frame].m_fPerCam[1].m_cameraId == 0 )
+        else if ( it_per_id.m_fPerFrame[this_frame].m_fPerCam[1].m_cameraId == m_cameraIndex2 )
             measure_l = it_per_id.m_fPerFrame[this_frame].m_fPerCam[1].m_measPoint;
         else
             continue;
@@ -347,23 +349,27 @@ InitVio::InitialStereoVioPnP::stereoTriangulate( int frame )
         unsigned int start_frame = it_per_id.m_startFrame;
         unsigned int this_frame  = frame - start_frame;
 
+        // if ( it_per_id.m_fPerFrame.size( ) < this_frame )
+        //     continue;
+
         if ( it_per_id.m_fPerFrame[this_frame].m_numOfMeas < 2 )
             continue;
 
         auto& it_per_camera = it_per_id.m_fPerFrame[this_frame].m_fPerCam;
 
         Vector3d point_l, point_r;
-        if ( it_per_camera[0].m_cameraId == 0 && it_per_camera[1].m_cameraId == 1 )
+        if ( it_per_camera[0].m_cameraId == m_cameraIndex //
+             && it_per_camera[1].m_cameraId == m_cameraIndex2 )
         {
             point_l = it_per_camera[0].m_measPoint;
             point_r = it_per_camera[1].m_measPoint;
         }
-        //        else if ( it_per_camera[1].m_cameraId == 0 && it_per_camera[0].m_cameraId
-        //        == 1 )
-        //        {
-        //            point_l = it_per_camera[1].m_measPoint;
-        //            point_r = it_per_camera[0].m_measPoint;
-        //        }
+        else if ( it_per_camera[1].m_cameraId == m_cameraIndex //
+                  && it_per_camera[0].m_cameraId == m_cameraIndex2 )
+        {
+            point_l = it_per_camera[1].m_measPoint;
+            point_r = it_per_camera[0].m_measPoint;
+        }
         else
             continue;
 

@@ -187,10 +187,59 @@ FeatureManager::addFeatureStereo( int frame_count, const FeatureData& image )
         {
             f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt, i_p.err ) );
         }
+        if ( f_per_cam.empty( ) || f_per_cam.size( ) < 2 )
+            continue;
+
         FeaturePerFrame f_per_fra( f_per_cam );
 
-        if ( f_per_fra.m_numOfMeas == 1 )
+        int feature_id = id_pts.first;
+
+        auto it = find_if( feature.begin( ), //
+                           feature.end( ),
+                           [feature_id]( const FeaturePerId& it ) {
+                               return it.m_featureId == feature_id;
+                           } );
+
+        if ( it == feature.end( ) )
+        {
+            feature.push_back( FeaturePerId( feature_id, frame_count ) );
+            feature.back( ).m_fPerFrame.push_back( f_per_fra );
+        }
+        else if ( it->m_featureId == feature_id )
+        {
+            it->m_fPerFrame.push_back( f_per_fra );
+            last_track_num++;
+        }
+    }
+
+    if ( frame_count < 2 || last_track_num < 20 )
+        return true;
+    return true;
+}
+
+bool
+FeatureManager::addFeatureStereoIndex( int frame_count, const FeatureData& image, int camera_index, int camera_index2 )
+{
+    ROS_DEBUG( "input feature: %d", ( int )image.size( ) );
+    ROS_DEBUG( "num of feature: %d", getFeatureCount( ) );
+
+    last_track_num = 0;
+    for ( auto& id_pts : image )
+    {
+        vector< FeaturePerCamera > f_per_cam;
+        for ( auto& i_p : id_pts.second )
+        {
+            int camera_id = i_p.cam_id;
+
+            if ( camera_id == camera_index || camera_id == camera_index2 )
+                f_per_cam.push_back( FeaturePerCamera( camera_id, i_p.pt, i_p.err ) );
+            else
+                continue;
+        }
+        if ( f_per_cam.empty( ) || f_per_cam.size( ) < 2 )
             continue;
+
+        FeaturePerFrame f_per_fra( f_per_cam );
 
         int feature_id = id_pts.first;
 
@@ -236,6 +285,104 @@ FeatureManager::addFeatureCheckParallax( int frame_count, const FeatureData& ima
         for ( auto& i_p : id_pts.second )
         {
             f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt, i_p.err ) );
+        }
+        //        std::cout << " stereo " << f_per_cam.size( ) << std::endl;
+        FeaturePerFrame f_per_fra( f_per_cam );
+
+        int feature_id = id_pts.first;
+
+        auto it = find_if( feature.begin( ), //
+                           feature.end( ),
+                           [feature_id]( const FeaturePerId& it ) {
+                               return it.m_featureId == feature_id;
+                           } );
+
+        if ( it == feature.end( ) )
+        {
+            feature.push_back( FeaturePerId( feature_id, frame_count ) );
+            feature.back( ).m_fPerFrame.push_back( f_per_fra );
+        }
+        else if ( it->m_featureId == feature_id )
+        {
+            it->m_fPerFrame.push_back( f_per_fra );
+            last_track_num++;
+        }
+    }
+
+    if ( frame_count < 2 || last_track_num < 30 )
+    {
+        ROS_WARN( "last_track_num %d", last_track_num );
+        m_isParallaxEnough = true;
+        return true;
+    }
+
+    for ( auto& it_per_id : feature )
+    {
+        if ( it_per_id.m_startFrame <= frame_count - 2
+             && it_per_id.m_startFrame + int( it_per_id.m_fPerFrame.size( ) ) - 1 >= frame_count - 1 )
+        {
+            parallax_sum += compensatedParallaxRad( it_per_id, frame_count );
+            parallax_num++;
+        }
+    }
+
+    //    check wether downward camera points visiable
+    //    if ( parallax_sum / parallax_num < MIN_VISIABLE_PARALLAX && !IN_AIR )
+    //    {
+    //        DOWN_CAMERA_VISIABLE = false;
+    //        removeMonoPointCamIndex( 1 );
+    //        ROS_ERROR( "DOWN_CAMERA_VISIABLE FALSE" );
+    //    }
+    //    else
+    //        DOWN_CAMERA_VISIABLE = true;
+
+    ROS_WARN( "current parallax: %lf deg", parallax_sum / parallax_num * 57.29 );
+
+    if ( parallax_num == 0 )
+    {
+        m_isParallaxEnough = false;
+        return true;
+    }
+    else
+    {
+        ROS_DEBUG( "parallax_sum: %lf, parallax_num: %d", parallax_sum, parallax_num );
+        ROS_DEBUG( "current parallax: %lf", parallax_sum / parallax_num );
+
+        m_isParallaxEnough = ( parallax_sum / parallax_num >= MIN_PARALLAX );
+
+        if ( num_pts_last < 40 )
+        {
+            ROS_WARN( "exis points %d", last_track_num );
+            return true;
+        }
+        else
+        {
+            return m_isParallaxEnough;
+        }
+    }
+}
+
+bool
+FeatureManager::addFeatureCheckParallax( int frame_count, const FeatureData& image, int max_camid )
+{
+    ROS_DEBUG( "input feature: %d", ( int )image.size( ) );
+    ROS_DEBUG( "num of feature: %d", getFeatureCount( ) );
+
+    m_isParallaxEnough  = false;
+    double parallax_sum = 0;
+    int parallax_num    = 0;
+    last_track_num      = 0;
+
+    int num_pts_last = getFeatureCount( );
+
+    for ( auto& id_pts : image )
+    {
+        vector< FeaturePerCamera > f_per_cam;
+        for ( auto& i_p : id_pts.second )
+        {
+            int cam_id = i_p.cam_id;
+            if ( cam_id <= max_camid )
+                f_per_cam.push_back( FeaturePerCamera( i_p.cam_id, i_p.pt, i_p.err ) );
         }
         //        std::cout << " stereo " << f_per_cam.size( ) << std::endl;
         FeaturePerFrame f_per_fra( f_per_cam );
@@ -552,27 +699,29 @@ FeatureManager::clearDepthCamIndex( const int camera_index )
 }
 
 VectorXd
-FeatureManager::getDepth( int& num_of_depth, std::vector< int >& camera_ids )
+FeatureManager::getDepth( int& num_of_depth )
 {
     //    cout << " getDepthVector " << endl;
     VectorXd dep_vec( getFeatureCount( ) );
     int feature_index = -1;
     num_of_depth      = 0;
-    camera_ids.clear( );
+    //    camera_ids.clear( );
+
     for ( auto& it_per_id : feature )
     {
         it_per_id.m_usedNum = it_per_id.m_fPerFrame.size( );
         if ( !( it_per_id.m_usedNum >= 2 && it_per_id.m_startFrame < WINDOW_SIZE - 2 ) )
             continue;
 
-        int camera_id = it_per_id.m_fPerFrame.at( 0 ).m_fPerCam.at( 0 ).m_cameraId;
+            //        int camera_id = it_per_id.m_fPerFrame.front( ).m_fPerCam.front(
+            //        ).m_cameraId;
 
 #if INV_DEPTH
         dep_vec( ++feature_index ) = 1. / it_per_id.m_depth;
 #else
         dep_vec( ++feature_index ) = it_per_id.estimated_depth;
 #endif
-        camera_ids.push_back( camera_id );
+        //        camera_ids.push_back( camera_id );
         ++num_of_depth;
     }
     return dep_vec;
@@ -1115,8 +1264,7 @@ FeatureManager::compensatedParallaxRad( const FeaturePerId& it_per_id, int frame
     if ( std::isnan( angle ) )
     {
         ROS_ERROR_STREAM( "frames " << it_per_id.m_fPerFrame.size( ) << " meas "
-                                    << it_per_id.m_fPerFrame[0].m_numOfMeas
-                                    << " cam "
+                                    << it_per_id.m_fPerFrame[0].m_numOfMeas << " cam "
                                     << it_per_id.m_fPerFrame[0].m_fPerCam[0].m_cameraId );
 
         for ( auto& pt : it_per_id.m_fPerFrame )

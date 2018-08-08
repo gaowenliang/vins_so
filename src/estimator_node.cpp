@@ -248,6 +248,9 @@ process( )
                 int camera_id  = img_msg->channels[1].values[i];       // camera id
                 double error   = img_msg->channels[2].values[i];       // error angle
 
+                if ( camera_id > NUM_OF_CAM - 1 )
+                    continue;
+
                 image[feature_id].emplace_back( camera_id,
                                                 error,
                                                 Vector3d( img_msg->points[i].x, //
@@ -300,7 +303,7 @@ main( int argc, char** argv )
 {
     ros::init( argc, argv, "vins_estimator" );
     ros::NodeHandle n( "~" );
-    ros::console::set_logger_level( ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info );
+    ros::console::set_logger_level( ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug );
     readParameters( n );
 
     estimator.initEstimator( WINDOW_SIZE, NUM_OF_CAM );

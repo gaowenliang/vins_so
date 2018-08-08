@@ -72,21 +72,21 @@
           cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_F2.yaml
           error_config_left:      /home/gao/ws/src/vins/feature_frontend/data/F_cam
           error_config_right:     /home/gao/ws/src/vins/feature_frontend/data/F_cam
-          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config1.yaml
       camera2:
           image_topic:            /image/R
           cam_config_file_left:   /home/gao/ws/src/vins/config/dual/vins/cam_config_R.yaml
           cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_R2.yaml
           error_config_left:      /home/gao/ws/src/vins/feature_frontend/data/R_cam
           error_config_right:     /home/gao/ws/src/vins/feature_frontend/data/R_cam
-          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+          feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config1.yaml
       camera3:
          image_topic:            /image/B
          cam_config_file_left:   /home/gao/ws/src/vins/config/dual/vins/cam_config_B.yaml
          cam_config_file_right:  /home/gao/ws/src/vins/config/dual/vins/cam_config_B2.yaml
          error_config_left:      /home/gao/ws/src/vins/feature_frontend/data/B_cam
          error_config_right:     /home/gao/ws/src/vins/feature_frontend/data/B_cam
-         feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config.yaml
+         feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config1.yaml
       camera4:
           image_topic:            /pg_17221110/image
           feature_config_file:    /home/gao/ws/src/vins/config/dual/vins/feature_config_up.yaml

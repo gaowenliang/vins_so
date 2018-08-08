@@ -92,6 +92,7 @@ class Estimator
 
     int cnt_imu_obseve;
     bool is_imu_obseve;
+    bool is_in_air;
 
     vector< Vector3d > point_cloud;
     vector< Vector3d > margin_cloud;
@@ -104,8 +105,6 @@ class Estimator
     double paraFeature[NUM_OF_F][SIZE_FEATURE];
     double paraExPose[MAX_NUM_OF_CAMS][SIZE_POSE];
     double paraRetrivePose[SIZE_POSE];
-
-    std::vector< int > para_Feature_CameraID;
 
     bool relocalize;
     Vector3d relocalize_t;

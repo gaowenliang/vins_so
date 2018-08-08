@@ -36,14 +36,15 @@ SlideWindowIMU::checkObservibility( )
         {
             double dt      = imu->sum_dt;
             Vector3d tmp_g = imu->delta_v / dt;
-            var += ( tmp_g - aver_g ).transpose( ) * ( tmp_g - aver_g );
+            Vector3d err_g = tmp_g - aver_g;
+            var += err_g.transpose( ) * err_g;
         }
     }
     var = sqrt( var / imu_cnt );
 
     std::cout << "IMU var " << var << "\n";
 
-    if ( var < 0.2 )
+    if ( var < 0.4 )
     {
         ROS_INFO( "IMU excitation not enouth!" );
         return false;

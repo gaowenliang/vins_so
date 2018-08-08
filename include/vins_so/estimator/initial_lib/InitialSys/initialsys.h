@@ -14,34 +14,12 @@ namespace InitVio
 class InitialSys
 {
     public:
-    InitialSys( int _num_camera, int _num_stereo )
-    : done( false )
-    , num_stereo( _num_stereo )
-    , num_camera( _num_camera )
-    , m_exParamSet( false )
-    {
-        m_Ex_ics.resize( _num_camera );
-
-        initClear( );
-        initReset( );
-    }
-    InitialSys( int _num_camera, int _num_stereo, std::vector< Tf > tf_ics )
-    : done( false )
-    , num_stereo( _num_stereo )
-    , num_camera( _num_camera )
-    , m_exParamSet( false )
-    {
-        if ( int( tf_ics.size( ) ) != _num_camera )
-        {
-            std::cout
-            << "[ERROR] error eith camera extrinsic parameters set in InitialSys.\n";
-        }
-        m_Ex_ics.resize( _num_camera );
-
-        setEx( tf_ics );
-        initClear( );
-        initReset( );
-    }
+    InitialSys( int _num_camera, int _num_stereo );
+    InitialSys( int _num_camera, int _num_stereo, std::vector< Tf > tf_ics );
+    InitialSys( int _num_camera,
+                int _num_stereo,
+                std::vector< Tf > tf_ics,
+                std::vector< std::pair< int, int > > stereo_cam_ids );
 
     bool initial( );
     void slideWindow( const std::vector< Tf > tf_ic );
@@ -66,6 +44,7 @@ class InitialSys
                            Vector3d& _g );
     void initClear( );
     void initReset( );
+    void initReset( std::vector< std::pair< int, int > > stereo_cam_ids );
     bool Done( ) const;
 
     private:

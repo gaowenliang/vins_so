@@ -1,7 +1,6 @@
 #include "vins_so/estimator/estimator.h"
 #include <Eigen/StdVector>
 
-//#define DUAL_FISHEYE 1
 #define MARG 1
 
 using namespace slidewindow;
@@ -43,12 +42,6 @@ Estimator::setParameter( )
             {
                 //  croppeed images is rectified
                 Tf tf_rl = tf_ics[i + 1].inverse( ) + tf_ics[i];
-
-#if DUAL_FISHEYE
-                Matrix3d rrl;
-                rrl << -1., 0., 0., 0., 1., 0., 0., 0., -1.;
-                tf_rl.setR( rrl );
-#endif
 
                 Tf tf_lr        = tf_rl.inverse( );
                 double baseline = tf_lr.norm( );
@@ -92,7 +85,8 @@ Estimator::clearState( )
         vioInitialSys.reset( );
     vioInitialSys = InitVio::InitialSysPtr( new InitVio::InitialSys( NUM_OF_CAM, //
                                                                      NUM_OF_STEREO,
-                                                                     tf_ics ) );
+                                                                     tf_ics,
+                                                                     STEREO_CAM_IDS ) );
 
     sum_of_back       = 0;
     sum_of_front      = 0;
@@ -103,6 +97,7 @@ Estimator::clearState( )
 
     cnt_imu_obseve = 0;
     is_imu_obseve  = false;
+    is_in_air      = false;
 
     relocalize_t = Eigen::Vector3d( 0, 0, 0 );
     relocalize_r = Eigen::Matrix3d::Identity( );
@@ -167,7 +162,7 @@ Estimator::processImage( const FeatureData& image, const std_msgs::Header& heade
     {
         if ( pImu->checkObservibility( ) )
             cnt_imu_obseve++;
-        if ( cnt_imu_obseve > 2 )
+        if ( cnt_imu_obseve > 3 )
             is_imu_obseve = true;
     }
 
@@ -185,6 +180,8 @@ Estimator::processImage( const FeatureData& image, const std_msgs::Header& heade
             {
                 solver_flag = NONLINEAR;
                 vioInitialSys->copyInitInfoBack( pWindow, pImu, g );
+
+                ROS_WARN_STREAM( "feature size " << pWindow->m_featureManager.getFeatureCount( ) );
 
                 solveOdometry( );
                 slideWindow( );
@@ -230,6 +227,12 @@ Estimator::processImage( const FeatureData& image, const std_msgs::Header& heade
         last_Pose = pWindow->poseLast( );
         last_vel  = pWindow->lastVel( );
         last_tf0  = pWindow->Pose[0];
+
+        if ( !is_in_air )
+        {
+            if ( last_Pose.getT( )( 2 ) > 0.5 )
+                is_in_air = true;
+        }
     }
 }
 
@@ -248,18 +251,18 @@ Estimator::solveOdometry( )
 void
 Estimator::vector2double( )
 {
-
     pWindow->windowToDouble( paraPose, paraSpeed );
     pImu->windowToDouble( paraBias );
 
     for ( int i = 0; i < NUM_OF_CAM; i++ )
         tf_ics[i].TfToDouble( paraExPose[i] );
 
-    int num_of_depth = 0;
-    VectorXd dep = pWindow->m_featureManager.getDepth( num_of_depth, para_Feature_CameraID );
     ROS_WARN_STREAM( "feature size " << pWindow->m_featureManager.getFeatureCount( ) << ", mono "
                                      << pWindow->m_featureManager.getFeatureCountMono( ) << ", stereo "
                                      << pWindow->m_featureManager.getFeatureCountStereo( ) );
+
+    int num_of_depth = 0;
+    VectorXd dep     = pWindow->m_featureManager.getDepth( num_of_depth );
 
     for ( int i = 0; i < num_of_depth; i++ )
     {
@@ -270,6 +273,7 @@ Estimator::vector2double( )
 void
 Estimator::double2vector( )
 {
+
     Vector3d origin_R0 = Utility::R2ypr( pWindow->Pose[0].R );
     Vector3d origin_P0 = pWindow->Pose[0].T;
 
@@ -345,7 +349,7 @@ Estimator::double2vector( )
     }
 
     int num_of_depth = 0;
-    VectorXd dep = pWindow->m_featureManager.getDepth( num_of_depth, para_Feature_CameraID );
+    VectorXd dep     = pWindow->m_featureManager.getDepth( num_of_depth );
     for ( int i = 0; i < num_of_depth; i++ )
         dep( i ) = paraFeature[i][0];
     //    ROS_DEBUG_STREAM( " dep " << endl << dep );
@@ -425,8 +429,9 @@ Estimator::optimization( )
 
         if ( ESTIMATE_EXTRINSIC )
         {
-            if ( !is_imu_obseve )
+            if ( !is_in_air )
             {
+                ROS_DEBUG( "NOT in_air" );
                 ROS_DEBUG( "fix extinsic param" );
                 problem.SetParameterBlockConstant( paraExPose[i] );
             }
@@ -437,6 +442,8 @@ Estimator::optimization( )
             problem.SetParameterBlockConstant( paraExPose[i] );
         }
     }
+
+    ROS_WARN_STREAM( "feature sd size " << pWindow->m_featureManager.getFeatureCount( ) );
 
     TicToc t_whole, t_prepare;
     vector2double( );

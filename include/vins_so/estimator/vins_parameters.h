@@ -12,9 +12,11 @@ const double FOCAL_LENGTH    = 460.0;
 const int WINDOW_SIZE        = 10;
 const int NUM_OF_F           = 1000;
 const double LOOP_INFO_VALUE = 50.0;
-const int MAX_NUM_OF_CAMS    = 3;
+const int MAX_NUM_OF_CAMS    = 22;
+
 //#define DEPTH_PRIOR
 //#define GT
+
 #define UNIT_SPHERE_ERROR
 #define INV_DEPTH 1
 
@@ -47,6 +49,7 @@ extern int MAX_KEYFRAME_NUM;
 extern std::string PATTERN_FILE;
 extern std::string VOC_FILE;
 
+extern std::vector< std::pair< int, int > > STEREO_CAM_IDS;
 extern std::vector< std::string > CAM_NAMES;
 extern std::vector< std::string > IMAGE_TOPICS;
 extern std::vector< std::string > FEATURE_TOPICS;

@@ -20,6 +20,9 @@ class SlideWindowPose : public SlideWindowBase
 
     MarginalizationFlag addFeaturesToWindow( int _frame_count, //
                                              const FeatureData& _image );
+    MarginalizationFlag addFeaturesToWindow( int _frame_count, //
+                                             const FeatureData& _image,
+                                             int max_cam_id );
 
     void slideWindowOld( const Tf& back_Tf_wi, const std::vector< Tf >& Tf_ic, bool shift_depth );
     void slideWindowNew( );

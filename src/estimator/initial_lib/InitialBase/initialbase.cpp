@@ -77,9 +77,15 @@ InitVio::Initial::checkEx( )
 }
 
 void
-InitVio::Initial::setAlignCameraIndex( int cameraIndex )
+InitVio::Initial::setCameraIndex( int cameraIndex )
 {
     m_cameraIndex = cameraIndex;
+}
+
+void
+InitVio::Initial::addCameraIndex( int cameraIndex )
+{
+    m_cameraIndex2 = cameraIndex;
 }
 
 void

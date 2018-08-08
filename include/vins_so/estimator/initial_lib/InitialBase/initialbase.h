@@ -57,10 +57,10 @@ class Initial
     {
     }
 
-    virtual bool initial( )                                   = 0;
-    virtual void slideWindow( const std::vector< Tf > tf_ic ) = 0;
+    virtual bool initial( )                                                             = 0;
+    virtual void slideWindow( const std::vector< Tf > tf_ic )                           = 0;
     virtual void pushImage( double time, int _frame_count, const FeatureData& _points ) = 0;
-    virtual bool getEx( std::vector< Tf >& exparam ) const = 0;
+    virtual bool getEx( std::vector< Tf >& exparam ) const                              = 0;
     virtual void copyInitInfoBack( slidewindow::SlideWindowPoseVelPtr window_new, //
                                    slidewindow::SlideWindowIMUPtr imu_new,
                                    Vector3d& _g )
@@ -71,7 +71,8 @@ class Initial
     void setEx( const exParam& ex_ic_in, int camera_index );
     bool checkEx( );
 
-    void setAlignCameraIndex( int cameraIndex );
+    void setCameraIndex( int cameraIndex );
+    void addCameraIndex( int cameraIndex );
     void clear( );
     void pushImu( const double dt, const Eigen::Vector3d& acc, const Eigen::Vector3d& gyr );
     void resetImu( const Eigen::Vector3d& _acc_0,
@@ -83,7 +84,8 @@ class Initial
 
     public:
     InitType m_type;
-    int m_cameraIndex; // align image and camera
+    int m_cameraIndex;  // align image and camera
+    int m_cameraIndex2; // if stereo camera
     int m_windowSize;
 
     ///

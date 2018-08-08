@@ -81,6 +81,19 @@ SlideWindowPose::addFeaturesToWindow( int _frame_count, //
     return m_margFlag;
 }
 
+MarginalizationFlag
+SlideWindowPose::addFeaturesToWindow( int _frame_count, const FeatureData& _image, int max_cam_id )
+{
+    ROS_DEBUG( "Adding feature points %lu", _image.size( ) );
+
+    if ( m_featureManager.addFeatureCheckParallax( _frame_count, _image, max_cam_id ) )
+        m_margFlag = MARGIN_OLD;
+    else
+        m_margFlag = MARGIN_SECOND_NEW;
+
+    return m_margFlag;
+}
+
 void
 SlideWindowPose::slideWindowOld( const Tf& back_Tf_wi, const std::vector< Tf >& Tf_ic, bool shift_depth )
 {

@@ -88,7 +88,7 @@ printStatistics( const Estimator& estimator, double t )
     {
         // ROS_DEBUG("calibration result for camera %d", i);
         ROS_DEBUG_STREAM( "extirnsic tic: " << estimator.tf_ics[i].T.transpose( ) );
-        ROS_DEBUG_STREAM( "extrinsic ric: " << Utility::R2ypr( estimator.tf_ics[i].R ).transpose( ) );
+        ROS_DEBUG_STREAM( "          ric: " << Utility::R2ypr( estimator.tf_ics[i].R ).transpose( ) );
         if ( ESTIMATE_EXTRINSIC )
         {
             cv::FileStorage fs( EX_CALIB_RESULT_PATHS[i], cv::FileStorage::WRITE );

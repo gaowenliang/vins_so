@@ -25,6 +25,7 @@ int LOOP_CLOSURE = 0;
 int MIN_LOOP_NUM;
 // std::string CAM_NAMES;
 std::vector< std::string > CAM_NAMES;
+std::vector< std::pair< int, int > > STEREO_CAM_IDS;
 
 std::string PATTERN_FILE;
 std::string VOC_FILE;
@@ -73,6 +74,13 @@ readParameters( ros::NodeHandle& n )
     {
         ROS_ERROR( "ERROR with camera number!!!" );
         ros::shutdown( );
+    }
+
+    for ( int stereo_index = 0; stereo_index < NUM_OF_STEREO; ++stereo_index )
+    {
+        STEREO_CAM_IDS.push_back( std::pair< int, int >( stereo_index * 2, stereo_index * 2 + 1 ) );
+        std::cout << "Stereo Pair: " << STEREO_CAM_IDS[stereo_index].first << " "
+                  << STEREO_CAM_IDS[stereo_index].second << "\n";
     }
 
     // camera I/O parameters load
