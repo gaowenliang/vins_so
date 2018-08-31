@@ -21,7 +21,7 @@ class InitialMonoVio : public Initial
 
     void pushImage( double time, int _frame_count, const FeatureData& _points );
     bool initial( );
-    bool getEx( std::vector< Tf >& exparam ) const {}
+    bool getEx( std::vector< Tf >& exparam ) const;
     void slideWindow( const std::vector< Tf > tf_ic );
     void copyInitInfoBack( slidewindow::SlideWindowPoseVelPtr window_new,
                            slidewindow::SlideWindowIMUPtr imu_new,

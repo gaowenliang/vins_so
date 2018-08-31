@@ -48,19 +48,19 @@ InitVio::InitialMonoVio::initial( )
     return m_done;
 }
 
-// bool
-// InitVio::InitialMonoVio::getEx( std::vector< Tf >& exparam ) const
-//{
-//    if ( checkEx( ) )
-//    {
-//        exparam[m_cameraIndex] = m_exParams[0]( );
-//        return true;
-//    }
-//    else
-//    {
-//        return false;
-//    }
-//}
+bool
+InitVio::InitialMonoVio::getEx( std::vector< Tf >& exparam ) const
+{
+    // if ( checkEx( ) )
+    {
+        exparam[m_cameraIndex] = m_exParams[0].m_Tf_ic;
+        return true;
+    }
+    // else
+    // {
+    //     return false;
+    // }
+}
 
 FeatureData
 InitVio::InitialMonoVio::getFeatureCamIndex( int cam_index, //

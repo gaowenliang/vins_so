@@ -1,6 +1,6 @@
 <launch>
 
-    <node pkg="feature_frontend" type="stereoPreprocess" name="process" >
+    <node pkg="feature_frontend" type="stereoPreprocess" name="process">
         <param name="is_image_show" type="bool" value="false"/>
         <param name="down_sample_scale" type="double" value="1.0"/>
         <remap from="/stereo/left/image_raw" to="/pg_17221110/image_raw"/>
@@ -9,7 +9,7 @@
         <remap from="/stereo/right/image" to="/pg_17221121/image"/>
     </node>
 
-    <node pkg="fisheye_model" type="dualfisheye_node" name="fisheyeUp" output="screen">
+    <node pkg="fisheye_model" type="dualfisheye_node" name="fisheyeUp"  output="screen" >
         <remap from="~up_image_raw" to="/pg_17221110/image_raw"/>
         <remap from="~down_image_raw" to="/pg_17221121/image_raw"/>
 
@@ -19,11 +19,11 @@
         <param name="down_camera_model_file" type="string" value="$(find vins_so)/../config/dual/cam_down_camera_calib.yaml"/>
         <param name="down_vignetting_model_file" type="string" value="$(find vins_so)/../config/dual/down_vignetting_model_calib.yaml"/>
 
-        <param name="up_cropper_file" type="string" value="$(find fisheye_model)/config/fisheyeUp.yaml"/>
-        <param name="down_cropper_file" type="string" value="$(find fisheye_model)/config/fisheyeUp.yaml"/>
+        <param name="cropper_file_up" type="string" value="$(find fisheye_model)/config/fisheyeUp.yaml"/>
+        <param name="cropper_file_down" type="string" value="$(find fisheye_model)/config/fisheyeUp.yaml"/>
 
         <param name="is_image_show" type="bool" value="false"/>
-        <param name="camera_num" type="int" value="4"/>
+        <param name="camera_num" type="int" value="5"/>
         <rosparam>
             imgFInfo:           /camera_info
             # individual setting for camera 0
@@ -51,11 +51,17 @@
                 angle_row:      65.0
                 angle_col:      90.0
                 rate:           10
+            camera4: #B
+                pub_image:      /image/UD
+                max_image_size: 200
+                angle_row:      90.0
+                angle_col:      90.0
+                rate:           10
         </rosparam>
     </node>
 
 
-<node pkg="feature_frontend" type="dualfisheyefeaturenode" name="feature" output="screen">
+<node pkg="feature_frontend" type="dualfisheyefeaturenode" name="feature"  >
   <param name="camera_num_stereo" type="int" value="4"/>
   <param name="camera_num_mono" type="int" value="2"/>
   <rosparam>
@@ -111,7 +117,7 @@
 </node>-->
 
 
-<node ns = "vins" name="vins" pkg="vins_so" type="vins_so" output="screen">
+<node ns = "vins" name="vins" pkg="vins_so" type="vins_so"   output="screen">
     <param name="vins_folder" type="string" value="/home/gao/ws/src/vins/" />
     <param name="num_of_cam" type="int" value="2" />
     <param name="camera_num_stereo" type="int" value="1"/>

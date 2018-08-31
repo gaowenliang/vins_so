@@ -7,9 +7,7 @@
 #include "factor/ProjectionFactorSingleCam.h"
 #include "factor/imu_factor.h"
 #include "factor/marginalization_factor.h"
-#include "factor/monoprojectionfactor.h"
 #include "factor/pose_local_parameterization.h"
-#include "factor/stereotimeprojectionfactor.h"
 
 #include "feature_manager/feature_manager.h"
 
