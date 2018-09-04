@@ -57,7 +57,7 @@ InitVio::InitialSys::initial( )
         {
             done = initStereoTmp->initial( );
             if ( done )
-                break;
+                return true;
         }
 
     if ( !done )
@@ -65,8 +65,9 @@ InitVio::InitialSys::initial( )
         {
             done = initMonoTmp->initial( );
             if ( done )
-                break;
+                return true;
         }
+    return false;
 }
 
 void
@@ -218,7 +219,7 @@ InitVio::InitialSys::initReset( std::vector< std::pair< int, int > > stereo_cam_
             vioInitMono[camera_index]->setCameraIndex( camera_index );
         }
 
-    if ( num_stereo == stereo_cam_ids.size( ) )
+    if ( num_stereo == int( stereo_cam_ids.size( ) ) )
         for ( int camera_index = 0; camera_index < num_stereo; ++camera_index )
         {
             if ( vioInitStereo[camera_index] != nullptr )

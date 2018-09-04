@@ -10,7 +10,7 @@ ProjectionFactorMultiCam::ProjectionFactorMultiCam( const Eigen::Vector3d& _pts_
 {
 
     sqrt_info = 1.5 / err * Eigen::Matrix2d::Identity( );
-
+    //  sqrt_info = 460 / 1.5 * Eigen::Matrix2d::Identity( );
 #ifdef UNIT_SPHERE_ERROR
     Eigen::Vector3d b1, b2;
     Eigen::Vector3d a = pts_j.normalized( );

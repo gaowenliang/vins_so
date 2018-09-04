@@ -221,6 +221,33 @@ send_imu( const sensor_msgs::ImuConstPtr& imu_msg )
     estimator.processIMU( dt, Vector3d( dx, dy, dz ), Vector3d( rx, ry, rz ) );
 }
 
+void
+calcMec( const sensor_msgs::ImuConstPtr& imu_msg )
+{
+    double gyr_x = imu_msg->angular_velocity.x //
+                   - estimator.paraBias[WINDOW_SIZE][3];
+    double gyr_y = imu_msg->angular_velocity.y //
+                   - estimator.paraBias[WINDOW_SIZE][4];
+    double gyr_z = imu_msg->angular_velocity.z //
+                   - estimator.paraBias[WINDOW_SIZE][5];
+
+    double m_a = 0.307 / 2;
+    double m_b = 0.420 / 2;
+    Quaterniond correct_q;
+    Vector3d correct_v, v_b, v_add;
+    correct_q = estimator.last_Pose.R;
+    correct_v = estimator.last_vel;
+    v_add = Eigen::Vector3d( gyr_x, gyr_y, gyr_z ).cross( Eigen::Vector3d( 0.05, 0, 0 ) );
+    v_b   = correct_q.conjugate( ) * ( correct_v + v_add );
+    std::cout << "v_add " << v_add.transpose( ) << "\n";
+    double v0 = v_b.x( ) + v_b.y( ) + ( m_a + m_b ) * gyr_z;
+    double v1 = v_b.x( ) - v_b.y( ) - ( m_a + m_b ) * gyr_z;
+    double v2 = v_b.x( ) + v_b.y( ) - ( m_a + m_b ) * gyr_z;
+    double v3 = v_b.x( ) - v_b.y( ) + ( m_a + m_b ) * gyr_z;
+    std::cout << "  " << v0 << " " << v1 << " " << v2 << " " << v3 << " "
+              << "\n";
+}
+
 // thread: visual-inertial odometry
 void
 process( )
@@ -244,8 +271,8 @@ process( )
             FeatureData image; // map< int, vector< pair< int, Vector3d > > >
             for ( unsigned int i = 0; i < img_msg->points.size( ); i++ )
             {
-                int feature_id = img_msg->channels[0].values[i] + 0.5; // feature id
-                int camera_id  = img_msg->channels[1].values[i];       // camera id
+                int feature_id = img_msg->channels[0].values[i] + 0.4; // feature id
+                int camera_id  = img_msg->channels[1].values[i] + 0.4; // camera id
                 double error   = img_msg->channels[2].values[i];       // error angle
 
                 if ( camera_id > NUM_OF_CAM - 1 )
@@ -272,14 +299,9 @@ process( )
                 relocalize_t = estimator.relocalize_t;
                 relocalize_r = estimator.relocalize_r;
             }
-            if ( estimator.pWindow->Pose[WINDOW_SIZE].T.z( ) > 0.3
-                 && estimator.solver_flag != Estimator::INITIAL )
-                IN_AIR = true;
-            else
-                IN_AIR = false;
 
-            // ROS_WARN_STREAM( "IN_AIR " << IN_AIR << " , "
-            //                           << estimator.pWindow->Pose[WINDOW_SIZE].T.z( ) );
+            int imu_size = measurement.first.size( );
+            calcMec( measurement.first[imu_size - 1] );
 
             pubOdometry( estimator, header, relocalize_t, relocalize_r );
             pubKeyPoses( estimator, header, relocalize_t, relocalize_r );
@@ -292,7 +314,9 @@ process( )
         m_buf.lock( );
         m_state.lock( );
         if ( estimator.solver_flag == Estimator::SolverFlag::NONLINEAR )
+        {
             update( );
+        }
         m_state.unlock( );
         m_buf.unlock( );
     }

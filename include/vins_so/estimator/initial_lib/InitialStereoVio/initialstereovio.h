@@ -12,7 +12,7 @@ class InitialStereoVio : public Initial
     public:
     InitialStereoVio( int window_size = 10, int camera_size = 2 ) {}
 
-    bool getEx( std::vector< Tf >& exparam ) const {}
+    bool getEx( std::vector< Tf >& exparam ) const { return false; }
     void pushImage( double time, int _frame_count, const FeatureData& _points )
     {
         InitVio::ImageImuFrame image_imu_info( _points, m_tmpPreIntegration, time );

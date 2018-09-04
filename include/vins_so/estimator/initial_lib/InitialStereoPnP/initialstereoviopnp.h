@@ -19,7 +19,7 @@ class InitialStereoVioPnP : public Initial
 
     bool initial( );
     void pushImage( double time, int _frame_count, const FeatureData& _points );
-    bool getEx( std::vector< Tf >& exparam ) const {}
+    bool getEx( std::vector< Tf >& exparam ) const { return false; }
     void slideWindow( const std::vector< Tf > tf_ic );
     void copyInitInfoBack( slidewindow::SlideWindowPoseVelPtr window_new, //
                            slidewindow::SlideWindowIMUPtr imu_new,

@@ -9,6 +9,7 @@ ProjectionFactorSingleCam::ProjectionFactorSingleCam( const Eigen::Vector3d& _pt
 , pts_j( _pts_j )
 {
     sqrt_info = 1.5 / err * Eigen::Matrix2d::Identity( );
+    //  sqrt_info = 460 / 1.5 * Eigen::Matrix2d::Identity( );
 
 #ifdef UNIT_SPHERE_ERROR
     Eigen::Vector3d b1, b2;

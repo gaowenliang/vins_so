@@ -230,7 +230,7 @@ Estimator::processImage( const FeatureData& image, const std_msgs::Header& heade
 
         if ( !is_in_air )
         {
-            if ( last_Pose.getT( )( 2 ) > 0.5 )
+            if ( last_Pose.getT( ).norm( ) > 0.5 )
                 is_in_air = true;
         }
     }

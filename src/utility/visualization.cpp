@@ -394,7 +394,9 @@ pubTF( const Estimator& estimator, const std_msgs::Header& header, Eigen::Vector
         transform.setRotation( q );
         std::stringstream ss;
         ss << camera_index;
-        br.sendTransform(
-        tf::StampedTransform( transform, header.stamp, "body", "camera" + ss.str( ) ) );
+        br.sendTransform( tf::StampedTransform( transform, //
+                                                header.stamp,
+                                                "body",
+                                                "camera" + ss.str( ) ) );
     }
 }
