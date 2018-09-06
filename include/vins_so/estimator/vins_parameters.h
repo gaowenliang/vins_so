@@ -54,13 +54,13 @@ extern std::vector< std::string > CAM_NAMES;
 extern std::vector< std::string > IMAGE_TOPICS;
 extern std::vector< std::string > FEATURE_TOPICS;
 extern std::string IMU_TOPIC;
+extern std::string WHEEL_MEC_TOPIC;
 
 extern bool DOWN_CAMERA_VISIABLE;
 extern bool IN_AIR;
 extern int MIN_VISIABLE_PARALLAX;
 
-void
-readParameters( ros::NodeHandle& n );
+extern int IMAGE_ROW, IMAGE_COL;
 
 enum SIZE_PARAMETERIZATION
 {

@@ -1,4 +1,4 @@
-#include "vins_so/utility/CameraPoseVisualization.h"
+#include "vins_so/ros/CameraPoseVisualization.h"
 
 const Eigen::Vector3d CameraPoseVisualization::imlt = Eigen::Vector3d( -1.0, -0.5, 1.0 );
 const Eigen::Vector3d CameraPoseVisualization::imrt = Eigen::Vector3d( 1.0, -0.5, 1.0 );
@@ -15,6 +15,26 @@ Eigen2Point( const Eigen::Vector3d& v, geometry_msgs::Point& p )
     p.x = v.x( );
     p.y = v.y( );
     p.z = v.z( );
+}
+
+CameraPoseVisualization::CameraPoseVisualization( )
+: m_marker_ns( "CameraPoseVisualization" )
+, m_scale( 0.2 )
+, m_line_width( 0.01 )
+{
+    float r = 0.0;
+    float g = 0.0;
+    float b = 1.0;
+    float a = 1.0;
+
+    m_image_boundary_color.r           = r;
+    m_image_boundary_color.g           = g;
+    m_image_boundary_color.b           = b;
+    m_image_boundary_color.a           = a;
+    m_optical_center_connector_color.r = r;
+    m_optical_center_connector_color.g = g;
+    m_optical_center_connector_color.b = b;
+    m_optical_center_connector_color.a = a;
 }
 
 CameraPoseVisualization::CameraPoseVisualization( float r, float g, float b, float a )

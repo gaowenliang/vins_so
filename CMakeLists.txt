@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     camera_model
     code_utils
+    wheel_msgs
     )
 
 find_package(OpenCV REQUIRED)
@@ -83,6 +84,18 @@ set(loop_closure_LIB_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/loop-closure/keyframe.cpp
     ${PROJECT_SOURCE_DIR}/src/loop-closure/keyframe_database.cpp
     )
+set(ROS_IO_SOURCE_FILES
+    ${PROJECT_SOURCE_DIR}/src/ros/EstimateOutputROS.cpp
+    ${PROJECT_SOURCE_DIR}/src/ros/EstimateInputROS.cpp
+    ${PROJECT_SOURCE_DIR}/src/ros/CameraPoseVisualization.cpp
+    ${PROJECT_SOURCE_DIR}/src/ros/ros_io.cpp
+    ${PROJECT_SOURCE_DIR}/src/ros/EstimatorROS.cpp
+    )
+set(ESTIMATE_SOURCE_FILES
+    ${PROJECT_SOURCE_DIR}/src/estimator/vins_parameters.cpp
+    ${PROJECT_SOURCE_DIR}/src/estimator/estimator.cpp
+    ${PROJECT_SOURCE_DIR}/src/estimator/InertialPredict.cpp
+    )
 
 #add_library(vins STATIC
 #    ${slideWindow_LIB_SOURCE_FILES}
@@ -94,13 +107,9 @@ set(loop_closure_LIB_SOURCE_FILES
 
 add_executable(vins_so
     src/estimator_node.cpp
-    src/estimator/vins_parameters.cpp
-    src/estimator/estimator.cpp
-
     src/utility/utility.cpp
-    src/utility/visualization.cpp
-    src/utility/CameraPoseVisualization.cpp
-
+    ${ESTIMATE_SOURCE_FILES}
+    ${ROS_IO_SOURCE_FILES}
     ${slideWindow_LIB_SOURCE_FILES}
     ${factor_LIB_SOURCE_FILES}
     ${feature_manager_LIB_SOURCE_FILES}
