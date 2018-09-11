@@ -959,7 +959,10 @@ FeatureManager::removeBackShiftDepthCamIndex( Tf tf_wci_marg, Tf tf_wcj_marg, in
 void
 FeatureManager::removeBack( )
 {
-    for ( auto it = feature.begin( ), it_next = feature.begin( ); it != feature.end( ); it = it_next )
+    for ( auto it = feature.begin( ), //
+          it_next = feature.begin( );
+          it != feature.end( );
+          it = it_next )
     {
         it_next++;
 
@@ -977,7 +980,10 @@ FeatureManager::removeBack( )
 void
 FeatureManager::removeFront( int frame_count )
 {
-    for ( auto it = feature.begin( ), it_next = feature.begin( ); it != feature.end( ); it = it_next )
+    for ( auto it = feature.begin( ), //
+          it_next = feature.begin( );
+          it != feature.end( );
+          it = it_next )
     {
         it_next++;
 

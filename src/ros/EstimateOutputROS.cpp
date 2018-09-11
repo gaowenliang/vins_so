@@ -47,6 +47,12 @@ EstimateOutputROS::EstimateOutputROS( ros::NodeHandle& n )
 }
 
 void
+EstimateOutputROS::updateLoopPath( nav_msgs::Path _loop_path )
+{
+    loop_path = _loop_path;
+}
+
+void
 EstimateOutputROS::printStatistics( const Estimator& estimator, double t )
 {
     if ( estimator.solver_flag != Estimator::SolverFlag::NONLINEAR )
@@ -54,6 +60,12 @@ EstimateOutputROS::printStatistics( const Estimator& estimator, double t )
 
     ROS_INFO_STREAM( "position: " << estimator.last_Pose.T.transpose( ) );
     ROS_DEBUG_STREAM( "orientation: " << estimator.last_vel.transpose( ) );
+    // ROS_DEBUG_STREAM( "bias acc: " << estimator.paraBias[WINDOW_SIZE][0] << " "
+    //                               << estimator.paraBias[WINDOW_SIZE][1] << " "
+    //                               << estimator.paraBias[WINDOW_SIZE][2] );
+    // ROS_DEBUG_STREAM( "bias gyr: " << estimator.paraBias[WINDOW_SIZE][3] << " "
+    //                               << estimator.paraBias[WINDOW_SIZE][4] << " "
+    //                                << estimator.paraBias[WINDOW_SIZE][5] );
 
     for ( int i = 0; i < NUM_OF_CAM; i++ )
     {
@@ -237,7 +249,6 @@ EstimateOutputROS::pubCameraPose( const Estimator& estimator,
             camera_pose.pose.orientation.x = R.x( );
             camera_pose.pose.orientation.y = R.y( );
             camera_pose.pose.orientation.z = R.z( );
-
             pub_camera_poses.at( camera_index ).publish( camera_pose );
             cameraPoseVisuals.at( camera_index ).reset( );
             cameraPoseVisuals.at( camera_index ).add_pose( P, R );

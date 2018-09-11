@@ -1,7 +1,6 @@
 #ifndef SLIDEWINDOWBASE_H
 #define SLIDEWINDOWBASE_H
 
-#include "vins_so/estimator/feature_manager/feature_manager.h"
 #include "vins_so/type/transform.h"
 #include <eigen3/Eigen/Eigen>
 #include <iostream>

@@ -23,6 +23,9 @@ SlideWindowPose::clearWindow( )
         Pose[i].setZero( );
     }
     m_featureManager.clearState( );
+#ifdef MEC_WHEEL
+    m_wheels.clearState( );
+#endif
 }
 
 SlideWindowPose&
@@ -37,6 +40,9 @@ SlideWindowPose::operator=( const SlideWindowPose& other )
         m_margFlag  = other.m_margFlag;
 
         m_featureManager = other.m_featureManager;
+#ifdef MEC_WHEEL
+        m_wheels = other.m_wheels;
+#endif
     }
     return *this;
 }
@@ -82,7 +88,9 @@ SlideWindowPose::addFeaturesToWindow( int _frame_count, //
 }
 
 MarginalizationFlag
-SlideWindowPose::addFeaturesToWindow( int _frame_count, const FeatureData& _image, int max_cam_id )
+SlideWindowPose::addFeaturesToWindow( int _frame_count, //
+                                      const FeatureData& _image,
+                                      int max_cam_id )
 {
     ROS_DEBUG( "Adding feature points %lu", _image.size( ) );
 
@@ -112,13 +120,24 @@ SlideWindowPose::slideWindowOld( const Tf& back_Tf_wi, const std::vector< Tf >& 
         }
 
         m_featureManager.removeBackShiftDepth( tfs_wci, tfs_wcj );
+#ifdef MEC_WHEEL
+        m_wheels.removeBack( );
+#endif
     }
     else
+    {
         m_featureManager.removeBack( );
+#ifdef MEC_WHEEL
+        m_wheels.removeBack( );
+#endif
+    }
 }
 
 void
 SlideWindowPose::slideWindowNew( )
 {
     m_featureManager.removeFront( WINDOW_SIZE );
+#ifdef MEC_WHEEL
+    m_wheels.removeFront( );
+#endif
 }

@@ -3,6 +3,7 @@
 #include "../utility/tic_toc.h"
 #include "../utility/utility.h"
 
+#include "factor/MecanumWheelVelFactor.h"
 #include "factor/ProjectionFactorMultiCam.h"
 #include "factor/ProjectionFactorSingleCam.h"
 #include "factor/imu_factor.h"
@@ -40,6 +41,8 @@ class Estimator
                      const Vector3d& angular_velocity );
     void processImage( const FeatureData& image, //
                        const std_msgs::Header& header );
+    void processWheel( const vector< double > vels, //
+                       const Eigen::Vector3d gyrs );
 
     // internal
     void clearState( );

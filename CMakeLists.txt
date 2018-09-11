@@ -44,6 +44,8 @@ set(slideWindow_LIB_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/estimator/slideWindow/slidewindowposevel.cpp
     )
 set(factor_LIB_SOURCE_FILES
+    ${PROJECT_SOURCE_DIR}/src/estimator/factor/MecanumWheelVelFactor.cpp
+    ${PROJECT_SOURCE_DIR}/src/estimator/factor/GpsSinglePointFactor.cpp
     ${PROJECT_SOURCE_DIR}/src/estimator/factor/pose_local_parameterization.cpp
     ${PROJECT_SOURCE_DIR}/src/estimator/factor/stereoprojectionfactor.cpp
     ${PROJECT_SOURCE_DIR}/src/estimator/factor/ProjectionFactorSingleCam.cpp
@@ -52,6 +54,7 @@ set(factor_LIB_SOURCE_FILES
     )
 set(feature_manager_LIB_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/estimator/feature_manager/feature_manager.cpp
+    ${PROJECT_SOURCE_DIR}/src/estimator/feature_manager/WheelManager.cpp
     )
 set(initial_LIB_SOURCE_FILES
     # initial lib
@@ -90,6 +93,7 @@ set(ROS_IO_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/ros/CameraPoseVisualization.cpp
     ${PROJECT_SOURCE_DIR}/src/ros/ros_io.cpp
     ${PROJECT_SOURCE_DIR}/src/ros/EstimatorROS.cpp
+    ${PROJECT_SOURCE_DIR}/src/ros/ParamROS.cpp
     )
 set(ESTIMATE_SOURCE_FILES
     ${PROJECT_SOURCE_DIR}/src/estimator/vins_parameters.cpp

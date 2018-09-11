@@ -2,6 +2,8 @@
 #define SLIDEWINDOWPOSE_H
 
 #include "slidewindowbase.h"
+#include "vins_so/estimator/feature_manager/WheelManager.h"
+#include "vins_so/estimator/feature_manager/feature_manager.h"
 
 namespace slidewindow
 {
@@ -32,6 +34,10 @@ class SlideWindowPose : public SlideWindowBase
 
     public:
     FeatureManager m_featureManager;
+
+#ifdef MEC_WHEEL
+    WheelManager m_wheels;
+#endif
 };
 
 typedef boost::shared_ptr< SlideWindowPose > SlideWindowPosePtr;

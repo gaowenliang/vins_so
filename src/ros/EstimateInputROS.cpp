@@ -78,7 +78,7 @@ EstimateInputROS::InitSubscribe( ros::NodeHandle& n, //
 }
 
 VisualInertialMeasurements
-EstimateInputROS::getMeasurements( )
+EstimateInputROS::getVisualInertialMeasurements( )
 {
     VisualInertialMeasurements measurements;
 
@@ -112,6 +112,56 @@ EstimateInputROS::getMeasurements( )
         }
 
         measurements.emplace_back( IMUs, img_msg );
+    }
+    return measurements;
+}
+
+VisualInertialMecMeasurements
+EstimateInputROS::getVisualInertialMecMeasurements( )
+{
+    VisualInertialMecMeasurements measurements;
+
+    while ( true )
+    {
+        if ( imu_buf.empty( ) || feature_buf.empty( ) )
+            return measurements;
+
+        if ( !( imu_buf.back( )->header.stamp > feature_buf.front( )->header.stamp ) )
+        {
+            ROS_WARN( "wait for imu, only should happen at the beginning" );
+            sum_of_wait++;
+            return measurements;
+        }
+
+        if ( !( imu_buf.front( )->header.stamp < feature_buf.front( )->header.stamp ) )
+        {
+            ROS_WARN( "throw img, only should happen at the beginning" );
+            feature_buf.pop( );
+            continue;
+        }
+
+        sensor_msgs::PointCloudConstPtr img_msg = feature_buf.front( );
+        feature_buf.pop( );
+
+        std::vector< sensor_msgs::ImuConstPtr > IMUs;
+        while ( imu_buf.front( )->header.stamp <= img_msg->header.stamp )
+        {
+            IMUs.emplace_back( imu_buf.front( ) );
+            imu_buf.pop( );
+        }
+
+        ROS_ERROR_STREAM( "wheel_buf size " << wheel_buf.size( ) );
+
+        std::vector< wheel_msgs::wheelSpeedsConstPtr > wheels;
+        while ( wheel_buf.front( )->header.stamp <= img_msg->header.stamp )
+        {
+            wheels.emplace_back( wheel_buf.front( ) );
+            wheel_buf.pop( );
+        }
+        int wheels_size                       = wheels.size( );
+        wheel_msgs::wheelSpeedsConstPtr wheel = wheels[wheels_size - 1];
+
+        measurements.emplace_back( IMUs, img_msg, wheel );
     }
     return measurements;
 }
@@ -173,17 +223,9 @@ void
 EstimateInputROS::wheel_mec_callback( const wheel_msgs::wheelSpeedsConstPtr& msg )
 {
     m_buf.lock( );
-    mec_buf.push( msg );
+    wheel_buf.push( msg );
     m_buf.unlock( );
     con.notify_one( );
-
-    std::cout << "s  " << msg->speeds[0] << " " << msg->speeds[1] << " " << msg->speeds[2]
-              << " " << msg->speeds[3] << " "
-              << "\n";
-    {
-        std_msgs::Header header = msg->header;
-        header.frame_id         = "world";
-    }
 }
 
 void

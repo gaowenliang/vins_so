@@ -23,6 +23,9 @@ SlideWindowPoseVel::clearWindow( )
         Vel[i].setZero( );
     }
     m_featureManager.clearState( );
+#ifdef MEC_WHEEL
+    m_wheels.clearState( );
+#endif
 }
 
 Tf
@@ -115,6 +118,9 @@ SlideWindowPoseVel::operator=( const SlideWindowPoseVel& other )
         m_margFlag  = other.m_margFlag;
 
         m_featureManager = other.m_featureManager;
+#ifdef MEC_WHEEL
+        m_wheels = other.m_wheels;
+#endif
     }
     return *this;
 }

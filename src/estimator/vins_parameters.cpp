@@ -23,7 +23,6 @@ std::vector< std::string > EX_CALIB_RESULT_PATHS;
 std::string VINS_RESULT_PATH;
 int LOOP_CLOSURE = 0;
 int MIN_LOOP_NUM;
-// std::string CAM_NAMES;
 std::vector< std::string > CAM_NAMES;
 std::vector< std::pair< int, int > > STEREO_CAM_IDS;
 
@@ -31,7 +30,6 @@ std::string PATTERN_FILE;
 std::string VOC_FILE;
 std::vector< std::string > IMAGE_TOPICS;
 std::vector< std::string > FEATURE_TOPICS;
-// std::string IMAGE_TOPIC;
 std::string IMU_TOPIC;
 std::string WHEEL_MEC_TOPIC;
 int IMAGE_ROW, IMAGE_COL;

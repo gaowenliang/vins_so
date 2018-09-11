@@ -237,6 +237,14 @@ Estimator::processImage( const FeatureData& image, const std_msgs::Header& heade
 }
 
 void
+Estimator::processWheel( const vector< double > vels, const Vector3d gyrs )
+{
+#ifdef MEC_WHEEL
+    pWindow->m_wheels.addNewMeasurement( vels, gyrs );
+#endif
+}
+
+void
 Estimator::solveOdometry( )
 {
     if ( solver_flag == NONLINEAR )
@@ -283,14 +291,15 @@ Estimator::double2vector( )
         origin_P0     = last_tf0.T;
         failure_occur = 0;
     }
+
     Vector3d origin_R00 = Utility::R2ypr( Quaterniond( paraPose[0][6], //
                                                        paraPose[0][3],
                                                        paraPose[0][4],
                                                        paraPose[0][5] )
                                           .toRotationMatrix( ) );
-    double y_diff       = origin_R0.x( ) - origin_R00.x( );
+    double yaw_diff     = origin_R0.x( ) - origin_R00.x( );
 
-    Matrix3d rot_diff = Utility::ypr2R( Vector3d( y_diff, 0, 0 ) );
+    Matrix3d rot_diff = Utility::ypr2R( Vector3d( yaw_diff, 0, 0 ) );
 
     for ( int i = 0; i <= WINDOW_SIZE; i++ )
     {
@@ -322,14 +331,19 @@ Estimator::double2vector( )
     {
         for ( int i = 0; i < NUM_OF_CAM; i++ )
         {
-            tf_ics[i].setRT( Quaterniond( paraExPose[i][6],
-                                          paraExPose[i][3], //
-                                          paraExPose[i][4],
-                                          paraExPose[i][5] )
-                             .toRotationMatrix( ),
-                             Vector3d( paraExPose[i][0], //
-                                       paraExPose[i][1],
-                                       paraExPose[i][2] ) );
+            Tf tf_ex_ic, tf_ex_ic_last;
+            tf_ex_ic.setRT( Quaterniond( paraExPose[i][6],
+                                         paraExPose[i][3], //
+                                         paraExPose[i][4],
+                                         paraExPose[i][5] )
+                            .toRotationMatrix( ),
+                            Vector3d( paraExPose[i][0], //
+                                      paraExPose[i][1],
+                                      paraExPose[i][2] ) );
+            tf_ex_ic_last = tf_ics[i];
+
+            if ( std::abs( tf_ex_ic.norm( ) - tf_ex_ic_last.norm( ) ) < 0.5 * tf_ex_ic_last.norm( ) )
+                tf_ics[i] = tf_ex_ic;
 
             ROS_DEBUG_STREAM( " ex ics " << i << endl << tf_ics[i] );
         }
@@ -475,6 +489,16 @@ Estimator::optimization( )
                                   paraSpeed[j],
                                   paraBias[j] );
     }
+
+#ifdef MEC_WHEEL
+    for ( int i = 0; i < WINDOW_SIZE + 1; i++ )
+    {
+        MecanumWheelVelFactor* wheel_factor
+        = new MecanumWheelVelFactor( pWindow->m_wheels.getWheelVel( i ),
+                                     pWindow->m_wheels.getOmega( i ) );
+        problem.AddResidualBlock( wheel_factor, NULL, paraPose[i], paraSpeed[i] );
+    }
+#endif
 
     TicToc t_feature;
     int f_m_cnt       = 0;

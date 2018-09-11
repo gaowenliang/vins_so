@@ -3,10 +3,12 @@
 
 #include "EstimateInputROS.h"
 #include "EstimateOutputROS.h"
+#include "ParamROS.h"
 #include <ros/ros.h>
 
 class EstimateIOROS
-: public EstimateInputROS
+: public ParamROS
+, public EstimateInputROS
 , public EstimateOutputROS
 {
     public:
@@ -15,6 +17,11 @@ class EstimateIOROS
     EstimateIOROS( ros::NodeHandle& n, //
                    std::string imu_topic_name,
                    std::string feature_topic_name );
+
+    EstimateIOROS( ros::NodeHandle& n, //
+                   std::string imu_topic_name,
+                   std::string feature_topic_name,
+                   std::string wheel_topic_name );
 };
 
 #endif // ROS_IO_H

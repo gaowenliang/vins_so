@@ -31,23 +31,24 @@ GpsSinglePointFactor::Evaluate( const double* const* parameters, double* residua
 
             Eigen::Matrix< double, 3, 6 > jaco_i;
             jaco_i.leftCols< 3 >( )  = -R_gw;
-            jaco_i.rightCols< 3 >( ) = R_gw * R_wb * -Utility::skewSymm( P_b_b2 );
+            jaco_i.rightCols< 3 >( ) = -R_gw * -Utility::skewSymm( R_wb * P_b_b2 );
 
-            jacobian_pose_i.block< 2, 6 >( 0, 0 ) = jaco_i;
-            jacobian_pose_i.block< 2, 1 >( 0, 6 ).setZero( );
+            jacobian_pose_i.block< 3, 6 >( 0, 0 ) = jaco_i;
+            jacobian_pose_i.block< 3, 1 >( 0, 6 ).setZero( );
         }
         if ( jacobians[1] )
         {
             Eigen::Map< Eigen::Matrix< double, 3, 4, Eigen::RowMajor > > jacobian_g( jacobians[1] );
 
-            jacobian_g.block< 3, 3 >( 0, 0 ) = -R_gw;
+            jacobian_g.block< 3, 3 >( 0, 0 ) = Utility::skewSymm( R_gw * ( P_wb + R_wb * P_b_b2 ) );
             jacobian_g.block< 3, 1 >( 0, 3 ).setZero( );
         }
         if ( jacobians[2] )
         {
-            Eigen::Map< Eigen::Matrix< double, 3, 7, Eigen::RowMajor > > jacobian_ex( jacobians[2] );
+            Eigen::Map< Eigen::Matrix< double, 3, 3, Eigen::RowMajor > > jacobian_ex( jacobians[2] );
 
             jacobian_ex.block< 3, 3 >( 0, 0 ) = -R_gw * R_wb;
         }
     }
+    return true;
 }

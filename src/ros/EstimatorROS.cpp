@@ -1,20 +1,37 @@
 #include "vins_so/ros/EstimatorROS.h"
 
+EstimatorROS::EstimatorROS( ros::NodeHandle& n )
+: EstimateIOROS( n )
+{
+    // Estimator
+    initEstimator( WINDOW_SIZE, NUM_OF_CAM );
+    setParameter( );
+
+    // EstimateIOROS
+#ifdef MEC_WHEEL
+    InitSubscribe( n, IMU_TOPIC, "/feature/feature", "/wheelSpeeds" );
+#else
+    InitSubscribe( n, IMU_TOPIC, "/feature/feature" );
+#endif
+}
+
 void
 EstimatorROS::update( )
 {
     TicToc t_predict;
-    imuPropagate.latest_time = current_time;
+    {
+        imuPropagate.latest_time = current_time;
 
-    imuPropagate.m_P   = relocalize_r * pWindow->Pose[WINDOW_SIZE].T + relocalize_t;
-    imuPropagate.m_Q   = relocalize_r * pWindow->Pose[WINDOW_SIZE].R;
-    imuPropagate.m_V   = pWindow->Vel[WINDOW_SIZE];
-    imuPropagate.m_Ba  = pImu->m_Bas[WINDOW_SIZE];
-    imuPropagate.m_Bg  = pImu->m_Bgs[WINDOW_SIZE];
-    imuPropagate.acc_0 = acc_0;
-    imuPropagate.gyr_0 = gyr_0;
-    imuPropagate.m_g   = g;
-    imuPropagate.flag  = solver_flag;
+        imuPropagate.m_P   = relocalize_r * pWindow->Pose[WINDOW_SIZE].T + relocalize_t;
+        imuPropagate.m_Q   = relocalize_r * pWindow->Pose[WINDOW_SIZE].R;
+        imuPropagate.m_V   = pWindow->Vel[WINDOW_SIZE];
+        imuPropagate.m_Ba  = pImu->m_Bas[WINDOW_SIZE];
+        imuPropagate.m_Bg  = pImu->m_Bgs[WINDOW_SIZE];
+        imuPropagate.acc_0 = acc_0;
+        imuPropagate.gyr_0 = gyr_0;
+        imuPropagate.m_g   = g;
+        imuPropagate.flag  = solver_flag;
+    }
 
     queue< sensor_msgs::ImuConstPtr > tmp_imu_buf = imu_buf;
     for ( sensor_msgs::ImuConstPtr tmp_imu_msg; !tmp_imu_buf.empty( ); tmp_imu_buf.pop( ) )
@@ -55,166 +72,97 @@ EstimatorROS::send_imu( const sensor_msgs::ImuConstPtr& imu_msg )
 }
 
 void
-EstimatorROS::readParameters( ros::NodeHandle& n )
+EstimatorROS::process( )
 {
-    std::string vins_config_file;
-
-    vins_config_file = readParam< std::string >( n, "vins_config_file" );
-    VINS_FOLDER_PATH = readParam< std::string >( n, "vins_folder" );
-    NUM_OF_CAM       = readParam< int >( n, "num_of_cam" );
-    NUM_OF_STEREO    = readParam< int >( n, "camera_num_stereo" );
-
-    std::cout << " NUM_OF_CAM " << NUM_OF_CAM << std::endl;
-    std::cout << " NUM_OF_STEREO " << NUM_OF_STEREO << std::endl;
-    if ( NUM_OF_STEREO >= NUM_OF_CAM )
+    while ( true )
     {
-        ROS_ERROR( "ERROR with camera number!!!" );
-        ros::shutdown( );
-    }
 
-    for ( int stereo_index = 0; stereo_index < NUM_OF_STEREO; ++stereo_index )
-    {
-        STEREO_CAM_IDS.push_back( std::pair< int, int >( stereo_index * 2, stereo_index * 2 + 1 ) );
-        std::cout << "Stereo Pair: " << STEREO_CAM_IDS[stereo_index].first << " "
-                  << STEREO_CAM_IDS[stereo_index].second << "\n";
-    }
+        std::unique_lock< std::mutex > lk( m_buf );
 
-    // camera I/O parameters load
-    for ( int camera_index = 0; camera_index < NUM_OF_CAM; ++camera_index )
-    {
-        std::string prefix = boost::str( boost::format( "camera%d/" ) % camera_index );
+#ifdef MEC_WHEEL
+        VisualInertialMecMeasurements measurements;
+        con.wait( lk, [&] {
+            return ( measurements = getVisualInertialMecMeasurements( ) ).size( ) != 0;
+        } );
+#else
+        VisualInertialMeasurements measurements;
+        con.wait( lk, [&] {
+            return ( measurements = getVisualInertialMeasurements( ) ).size( ) != 0;
+        } );
+#endif
 
-        std::string camera_config_file
-        = readParam< std::string >( n, prefix + "cam_config_file" );
+        lk.unlock( );
 
-        cv::FileStorage camera_fs( camera_config_file, cv::FileStorage::READ );
-        if ( !camera_fs.isOpened( ) )
-            std::cerr << "ERROR: Wrong path to settings 'camera_config_file', camera"
-                      << camera_index << std::endl;
-
-        std::string image_topic;
-        std::string image_feature_topic;
-        camera_fs["image_topic"] >> image_topic;
-        camera_fs["feature_topic"] >> image_feature_topic;
-        IMAGE_TOPICS.push_back( image_topic );
-        FEATURE_TOPICS.push_back( image_feature_topic );
-        CAM_NAMES.push_back( camera_config_file );
-
-        IMAGE_COL = camera_fs["image_width"];
-        IMAGE_ROW = camera_fs["image_height"];
-
-        camera_fs.release( );
-    }
-
-    cv::FileStorage vins_fs( vins_config_file, cv::FileStorage::READ );
-    if ( !vins_fs.isOpened( ) )
-        std::cerr << "ERROR: Wrong path to settings 'vins_config_file'" << std::endl;
-
-    WHEEL_MEC_TOPIC = "/wheelSpeeds";
-
-    vins_fs["imu_topic"] >> IMU_TOPIC;
-
-    MAX_DEPTH             = vins_fs["max_depth"];
-    SOLVER_TIME           = vins_fs["max_solver_time"];
-    NUM_ITERATIONS        = vins_fs["max_num_iterations"];
-    MIN_PARALLAX          = vins_fs["keyframe_parallax"];
-    MIN_VISIABLE_PARALLAX = vins_fs["min_visiable_parallax"];
-    //    MIN_PARALLAX          = MIN_PARALLAX / FOCAL_LENGTH;
-    MIN_PARALLAX = MIN_PARALLAX / 57.29;
-
-    vins_fs["output_path"] >> VINS_RESULT_PATH;
-    VINS_RESULT_PATH = VINS_FOLDER_PATH + VINS_RESULT_PATH;
-    std::ofstream foutC( VINS_RESULT_PATH, std::ios::out );
-    foutC.close( );
-
-    ACC_N  = vins_fs["acc_n"];
-    ACC_W  = vins_fs["acc_w"];
-    GYR_N  = vins_fs["gyr_n"];
-    GYR_W  = vins_fs["gyr_w"];
-    G.z( ) = vins_fs["g_norm"];
-
-    ESTIMATE_EXTRINSIC = vins_fs["estimate_extrinsic"];
-    if ( ESTIMATE_EXTRINSIC == 2 )
-    {
-        ROS_WARN( "have no prior about extrinsic param, calibrate extrinsic param" );
-        for ( int camera_index = 0; camera_index < NUM_OF_CAM; ++camera_index )
+        for ( auto& measurement : measurements )
         {
-            RIC.push_back( Eigen::Matrix3d::Identity( ) );
-            TIC.push_back( Eigen::Vector3d::Zero( ) );
+            for ( auto& imu_msg : measurement.imu )
+                send_imu( imu_msg );
 
-            cv::FileStorage camera_fs( CAM_NAMES[camera_index], cv::FileStorage::READ );
-            if ( !camera_fs.isOpened( ) )
-                std::cerr
-                << "ERROR: Wrong path to loading `ex_calib_result_path` when settings "
-                   "'camera_config_file', camera"
-                << camera_index << std::endl;
+#ifdef MEC_WHEEL
+            vector< double > wheel_vels;
+            for ( auto& vel : measurement.wheel->speeds )
+                wheel_vels.push_back( vel );
+            int imu_size  = measurement.imu.size( );
+            auto& end_imu = measurement.imu[imu_size - 1];
+            Eigen::Vector3d gyr( end_imu->angular_velocity.x,
+                                 end_imu->angular_velocity.y,
+                                 end_imu->angular_velocity.z );
+            processWheel( wheel_vels, gyr );
+            ROS_ERROR_STREAM( "gyr " << gyr.transpose( ) );
+            ROS_ERROR_STREAM( "wheel_vels " << wheel_vels[0] << " " << wheel_vels[1] << " "
+                                            << wheel_vels[2] << " " << wheel_vels[3] << " " );
+#endif
 
-            std::string ex_calib_file;
-            camera_fs["ex_calib_result_path"] >> ex_calib_file;
-            EX_CALIB_RESULT_PATHS.push_back( VINS_FOLDER_PATH + ex_calib_file );
-            camera_fs.release( );
+            auto img_msg = measurement.feature;
+            ROS_DEBUG( "processing vision data with stamp %f \n", img_msg->header.stamp.toSec( ) );
+
+            TicToc t_s;
+            FeatureData image; // map< int, vector< pair< int, Vector3d > > >
+            for ( unsigned int i = 0; i < img_msg->points.size( ); i++ )
+            {
+                int feature_id = img_msg->channels[0].values[i] + 0.4; // feature id
+                int camera_id  = img_msg->channels[1].values[i] + 0.4; // camera id
+                double error   = img_msg->channels[2].values[i];       // error angle
+
+                if ( camera_id > NUM_OF_CAM - 1 )
+                    continue;
+
+                image[feature_id].emplace_back( camera_id,
+                                                error,
+                                                Vector3d( img_msg->points[i].x, //
+                                                          img_msg->points[i].y,
+                                                          img_msg->points[i].z )
+                                                .normalized( ) );
+            }
+            processImage( image, img_msg->header );
+
+            double whole_t = t_s.toc( );
+            printStatistics( *this, whole_t );
+
+            std_msgs::Header header = img_msg->header;
+            header.frame_id         = "world";
+            cur_header              = header;
+            m_loop_drift.lock( );
+            if ( relocalize )
+            {
+                relocalize_t = relocalize_t;
+                relocalize_r = relocalize_r;
+            }
+
+            pubOdometry( *this, header, relocalize_t, relocalize_r );
+            pubKeyPoses( *this, header, relocalize_t, relocalize_r );
+            pubCameraPose( *this, header, relocalize_t, relocalize_r );
+            pubPointCloud( *this, header, relocalize_t, relocalize_r );
+            pubTF( *this, header, relocalize_t, relocalize_r );
+            m_loop_drift.unlock( );
         }
-    }
-    else
-    {
-        if ( ESTIMATE_EXTRINSIC == 1 )
-            ROS_WARN( " Optimize extrinsic param around initial guess!" );
-        if ( ESTIMATE_EXTRINSIC == 0 )
-            ROS_WARN( " fix extrinsic param " );
-
-        for ( int camera_index = 0; camera_index < NUM_OF_CAM; ++camera_index )
+        m_buf.lock( );
+        m_state.lock( );
+        if ( solver_flag == Estimator::SolverFlag::NONLINEAR )
         {
-            cv::FileStorage camera_fs( CAM_NAMES[camera_index], cv::FileStorage::READ );
-            if ( !camera_fs.isOpened( ) )
-                std::cerr
-                << "ERROR: Wrong path to loading `ex_calib_result_path` when settings "
-                   "'camera_config_file', camera"
-                << camera_index << std::endl;
-
-            std::string ex_calib_file;
-            camera_fs["ex_calib_result_path"] >> ex_calib_file;
-            EX_CALIB_RESULT_PATHS.push_back( VINS_FOLDER_PATH + ex_calib_file );
-
-            cv::Mat cv_R, cv_T;
-            camera_fs["extrinsicRotation"] >> cv_R;
-            camera_fs["extrinsicTranslation"] >> cv_T;
-
-            camera_fs.release( );
-
-            Eigen::Matrix3d eigen_R;
-            Eigen::Vector3d eigen_T;
-            cv::cv2eigen( cv_R, eigen_R );
-            cv::cv2eigen( cv_T, eigen_T );
-            Eigen::Quaterniond Q( eigen_R );
-            eigen_R = Q.normalized( );
-
-            RIC.push_back( eigen_R );
-            TIC.push_back( eigen_T );
-
-            ROS_INFO_STREAM( "cam " << camera_index << " Ex_R : " << std::endl
-                                    << RIC[camera_index] );
-            ROS_INFO_STREAM( "cam " << camera_index << " Ex_T : " << std::endl
-                                    << TIC[camera_index].transpose( ) );
+            update( );
         }
+        m_state.unlock( );
+        m_buf.unlock( );
     }
-
-    LOOP_CLOSURE = vins_fs["loop_closure"];
-    if ( LOOP_CLOSURE == 1 )
-    {
-        vins_fs["voc_file"] >> VOC_FILE;
-
-        vins_fs["pattern_file"] >> PATTERN_FILE;
-        VOC_FILE     = VINS_FOLDER_PATH + VOC_FILE;
-        PATTERN_FILE = VINS_FOLDER_PATH + PATTERN_FILE;
-        MIN_LOOP_NUM = vins_fs["min_loop_num"];
-
-        //        CAM_NAMES = config_file; // TODO
-    }
-
-    INIT_DEPTH         = 5.0;
-    BIAS_ACC_THRESHOLD = 0.1;
-    BIAS_GYR_THRESHOLD = 0.1;
-    MAX_KEYFRAME_NUM   = 1000;
-
-    vins_fs.release( );
 }

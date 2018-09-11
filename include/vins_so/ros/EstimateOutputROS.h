@@ -12,7 +12,7 @@ class EstimateOutputROS
     public:
     EstimateOutputROS( ros::NodeHandle& n );
 
-    void updateLoopPath( nav_msgs::Path _loop_path ) { loop_path = _loop_path; }
+    void updateLoopPath( nav_msgs::Path _loop_path );
 
     void printStatistics( const Estimator& estimator, double t );
     void pubOdometry( const Estimator& estimator,

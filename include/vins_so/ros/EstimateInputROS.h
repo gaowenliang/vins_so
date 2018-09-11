@@ -3,6 +3,7 @@
 
 #include "../estimator/InertialPredict.h"
 #include "VisualInertialMeasurements.h"
+#include "VisualInertialMecMeasurements.h"
 #include <condition_variable>
 #include <cv_bridge/cv_bridge.h>
 #include <iostream>
@@ -32,7 +33,8 @@ class EstimateInputROS
                         std::string feature_topic_name,
                         std::string wheel_topic_name );
 
-    VisualInertialMeasurements getMeasurements( );
+    VisualInertialMeasurements getVisualInertialMeasurements( );
+    VisualInertialMecMeasurements getVisualInertialMecMeasurements( );
 
     void pubLatestOdometry( const Eigen::Vector3d& P,
                             const Eigen::Quaterniond& Q,
@@ -48,7 +50,7 @@ class EstimateInputROS
     std::queue< sensor_msgs::ImuConstPtr > imu_buf;
     std::queue< sensor_msgs::PointCloudConstPtr > feature_buf;
     std::queue< std::pair< cv::Mat, double > > image_buf;
-    std::queue< wheel_msgs::wheelSpeedsConstPtr > mec_buf;
+    std::queue< wheel_msgs::wheelSpeedsConstPtr > wheel_buf;
 
     public:
     std::mutex m_state;
